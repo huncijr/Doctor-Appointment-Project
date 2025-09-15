@@ -1,3 +1,126 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.anton-regular {
+  font-family: "Anton", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+@keyframes fadeInThenScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  50% {
+    opacity: 1; /* csak bejön az opacity */
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1); /* utána tágul a méret */
+  }
+}
+@keyframes scaleUp {
+  0% {
+    transform: translate(0, -50%) scale(0);
+  }
+  100% {
+    transform: translate(-50%) scale(1);
+  }
+}
+
+@keyframes fadeInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fadeInBottom {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes text-blur {
+  0%,
+  92%,
+  100% {
+    filter: blur(0);
+    color: theme("colors.secondary");
+  }
+  91% {
+    filter: blur(2px);
+    color: #ffffff;
+  }
+}
+@keyframes border-slide {
+  0%,
+  10% {
+    border-top-color: theme("colors.secondary");
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+  }
+  25% {
+    border-top-color: theme("colors.secondary");
+    border-right-color: theme("colors.secondary");
+    border-bottom-color: transparent;
+    border-left-color: transparent;
+  }
+  50% {
+    border-top-color: theme("colors.secondary");
+    border-right-color: theme("colors.secondary");
+    border-bottom-color: theme("colors.secondary");
+    border-left-color: transparent;
+  }
+  75% {
+    border-top-color: theme("colors.secondary");
+    border-right-color: theme("colors.secondary");
+    border-bottom-color: theme("colors.secondary");
+    border-left-color: theme("colors.secondary");
+  }
+  100% {
+    border-color: theme("colors.secondary");
+  }
+}
+.hover-border-animate:hover {
+  animation: border-slide 1.5s ease-in forwards;
+}
+
+@layer utilities {
+  .animate-fadeInScale {
+    animation: fadeInThenScale 1.2s ease-in-out forwards;
+    transform-origin: center;
+  }
+  .animate-scaleUp {
+    animation: scaleUp 1s ease-out forwards;
+    transform-origin: left;
+  }
+  .animate-fadeInRight {
+    animation: fadeInRight 1.4s ease-in forwards;
+  }
+  .animate-fadeInBottom {
+    animation: fadeInBottom 1.8s ease-out forwards;
+  }
+
+  .animate-text-blur {
+    animation: text-blur 2s ease-in 0.5s infinite;
+    will-change: filter;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-text-blur {
+    animation: none;
+  }
+}
