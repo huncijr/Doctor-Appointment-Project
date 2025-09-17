@@ -1,16 +1,39 @@
+import { NavLink } from "react-router-dom";
+
 const Navbar = () => {
+  const activeStyle = "text-secondary border-secondary";
   return (
     <header
       className="animate-fadeInRight mt-7 sm:mt-12
              flex flex-col sm:flex-row items-center justify-center gap-4  [&>*]:cursor-pointer
              [&>*]:border-y-2 [&>*]:transition-colors [&>*]:duration-500 
-             [&>*]:text-white [&>*]:text-xl sm:[&>*]:text-2xl lg:[&>*]:text-3xl
+             [&>*]:text-xl sm:[&>*]:text-2xl lg:[&>*]:text-3xl
              [&>*:hover]:text-secondary [&>*:hover]:border-secondary"
     >
-      <h1>HOME</h1>
-      <h1>APPOINTMENTS</h1>
-      <h1>ABOUT ME</h1>
-      <h1>MY ACCOUNT</h1>
+      <NavLink
+        to="/Home"
+        className={({ isActive }) => `${isActive ? activeStyle : "text-white"}`}
+      >
+        Home
+      </NavLink>
+      <NavLink
+        to="/Appointment"
+        className={({ isActive }) => `${isActive ? activeStyle : "text-white"}`}
+      >
+        APPOINTMENTS
+      </NavLink>
+      <NavLink
+        to="/AboutMe"
+        className={({ isActive }) => `${isActive ? activeStyle : "text-white"}`}
+      >
+        ABOUT ME
+      </NavLink>
+      <NavLink
+        to="/Account"
+        className={({ isActive }) => `${isActive ? activeStyle : "text-white"}`}
+      >
+        MY ACCOUNT
+      </NavLink>
     </header>
   );
 };
