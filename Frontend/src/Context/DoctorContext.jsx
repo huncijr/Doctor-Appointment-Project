@@ -4,7 +4,7 @@ const DoctorContext = createContext();
 export const DoctorProvider = ({ children }) => {
   const [selecteddoctor, setSelectedDoctor] = useState(() => {
     const saved = localStorage.getItem("Doctor");
-    return saved ? JSON.parse(saved) : null;
+    return saved ? JSON.parse(saved) : [];
   });
 
   useEffect(() => {

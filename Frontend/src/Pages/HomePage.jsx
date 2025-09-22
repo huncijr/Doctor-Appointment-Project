@@ -9,22 +9,18 @@ import {
 } from "flowbite-react";
 import { useState, useEffect, useRef } from "react";
 import { API } from "../Context/AppointmentAPI";
-import NavBar from "../Menu/Navbar.jsx";
+import NavBar from "../Components/Navbar.jsx";
 import { MoveLeft, MoveRight } from "lucide-react";
-import doctor1 from "../Doctors/doctor1.png";
-import doctor2 from "../Doctors/doctor2.png";
-import doctor3 from "../Doctors/doctor3.png";
-import doctor4 from "../Doctors/doctor4.png";
-import doctor5 from "../Doctors/doctor5.png";
-import doctor6 from "../Doctors/doctor6.png";
-import doctor7 from "../Doctors/doctor7.png";
-import place1 from "../Places/place1.webp";
-import place2 from "../Places/place2.webp";
-import place3 from "../Places/place3.webp";
+
+import placeinside from "../Places/placeinside.png";
+import placeoutside from "../Places/placeoutside.png";
+import place3 from "../Places/place3.png";
 import { useDoctor } from "../Context/DoctorContext.jsx";
+import { Link } from "react-router-dom";
+import { Doctors } from "../Context/Doctors.js";
 
 const HomePage = () => {
-  const [slide, setSlide] = useState([place1, place2, place3]);
+  const [slide, setSlide] = useState([placeoutside, placeinside, place3]);
   const [currentslide, setCurrentSlide] = useState(0);
   const [time, setTime] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -44,9 +40,7 @@ const HomePage = () => {
     }, 50);
     return () => clearInterval(intervalRef.current);
   }, []);
-  useEffect(() => {
-    console.log(selecteddoctor);
-  }, [selecteddoctor]);
+
   function Nextslide() {
     setSlideDirection("right");
     clearInterval(intervalRef.current);
@@ -82,58 +76,14 @@ const HomePage = () => {
     }, 50);
   }
 
-  const Doctors = {
-    Doctor1: {
-      fullname: "Dr. John Smith",
-      occupation: "Cardiologist",
-      description: "Expert in heart-related illnesses and treatments.",
-      img: doctor5,
-    },
-    Doctor2: {
-      fullname: "Dr. Emily Johnson",
-      occupation: "Pediatrician",
-      description: "Specialist in chidren's health and wellness.",
-      img: doctor1,
-    },
-    Doctor3: {
-      fullname: "Dr. Michael Brown",
-      occupation: "Dermatologist",
-      description: "Focused on skin conditions and cosmetic procedures.",
-      img: doctor2,
-    },
-    Doctor4: {
-      fullname: "Dr. Sarah Davis",
-      occupation: "Neurologist",
-      description: "Deals with brain and nervous system disorders.",
-      img: doctor4,
-    },
-    Doctor5: {
-      fullname: "Dr. William Wilson",
-      occupation: "Orthopedic Surgeon",
-      description: "Specializes in bones, joints, and musculoskeletal issues.",
-      img: doctor3,
-    },
-    Doctor6: {
-      fullname: "Dr. Olivia Martinez",
-      occupation: "Ophthalmologist",
-      description: "Expert in eye care and vision correction.",
-      img: doctor7,
-    },
-    Doctor7: {
-      fullname: "Dr. James Anderson",
-      occupation: "Psychiatrist",
-      description: "Focuses on mental health and psychological disorders.",
-      img: doctor6,
-    },
-    Doctor8: {
-      fullname: "Dr. Sophia Thomas",
-      occupation: "General Practitioner",
-      description: "Provides overall medical care for all ages.",
-      img: "https://via.placeholder.com/150?text=Doctor8",
-    },
-  };
   const handleClick = (doctor) => {
-    setSelectedDoctor(doctor);
+    const samedoctors = Object.values(Doctors).filter(
+      (d) => d.occupation === doctor.occupation
+    );
+    if (samedoctors.length > 1) {
+      setSelectedDoctor(samedoctors);
+    }
+    setSelectedDoctor([doctor]);
   };
 
   return (
@@ -184,32 +134,34 @@ const HomePage = () => {
           </h1>
         </div>
         <div className="py-10 md:px-12 lg:py-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10 px-10 ">
-          {Object.values(Doctors).map((doctor, index) => (
+          {Object.values(Doctors).map((doctor) => (
             <div
               className="animate-fadeInBottom"
               onClick={() => handleClick(doctor)}
-              key={index}
+              key={doctor.id}
             >
-              <Card className="h-full flex flex-col hover-border-animate cursor-pointer hover:border-3  max-w-sm  border">
-                <div className="flex-1 flex flex-col p-1 ">
-                  <figure className="h-80 overflow-hidden rounded-md w-full object-cover border-b-2 py-2 mb-2 border-secondary">
-                    <img
-                      src={doctor.img}
-                      alt="No image "
-                      className="text-white w-full h-full object-cover  min-w-[100%] min-h-[100%]"
-                    />
-                  </figure>
-                  <h5 className="text-2xl font-bold tracking-tight text-white">
-                    {doctor.fullname}
-                  </h5>
-                  <span className="italic flex justify-end text-secondary mb-2">
-                    {doctor.occupation}
-                  </span>
-                  <p className="font-normal text-gray-700">
-                    {doctor.description}
-                  </p>
-                </div>
-              </Card>
+              <Link to={`/Appointment/${doctor.fullname} `}>
+                <Card className="h-full flex flex-col hover-border-animate cursor-pointer hover:border-3  max-w-sm  border">
+                  <div className="flex-1 flex flex-col p-1 ">
+                    <figure className="h-80 overflow-hidden rounded-md w-full object-cover border-b-2 py-2 mb-2 border-secondary">
+                      <img
+                        src={doctor.img}
+                        alt="No image "
+                        className="text-white w-full h-full object-cover  min-w-[100%] min-h-[100%]"
+                      />
+                    </figure>
+                    <h5 className="text-2xl font-bold tracking-tight text-white">
+                      {doctor.fullname}
+                    </h5>
+                    <span className="italic flex justify-end text-secondary mb-2">
+                      {doctor.occupation}
+                    </span>
+                    <p className="font-normal text-gray-700">
+                      {doctor.description}
+                    </p>
+                  </div>
+                </Card>
+              </Link>
             </div>
           ))}
         </div>
