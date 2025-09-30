@@ -2,10 +2,11 @@ import { StepBack, StepForward } from "lucide-react";
 import { useEffect } from "react";
 
 const AppointmentTable = ({ doctor }) => {
-  function mereSchedules(doctors) {
-    if (doctor.length > 1) {
+  function mergSchedules(doctors) {
+    if (!doctors) return null;
+    if (Array.isArray(doctors) && doctors.length > 1) {
       const combined = {};
-      doctor.forEach((doc) => {
+      doctors.forEach((doc) => {
         Object.entries(doc.schedule).forEach(([day, slots]) => {
           if (!combined[day]) combined[day] = [];
           slots.forEach((slot) => {
@@ -14,19 +15,38 @@ const AppointmentTable = ({ doctor }) => {
             }
           });
         });
-        Object.keys(combined).forEach((day) => {
-          combined[day].sort((a, b) => {
-            combined[day].push(slot);
-          });
-        });
       });
-
       return combined;
     }
+    if (!Array.isArray(doctors)) {
+      const days = Object.keys(doctors.schedule);
+      const hours = doctors.schedule[days[0]].map((slot) => slot.time);
+      const reason = hours.map((_, i) =>
+        days.map((day) => doctor.schedule[day][i]?.reason || "")
+      );
+
+      return { days, hours, reason };
+    }
+    return null;
   }
-  const days = Object.keys(doctor.schedule);
-  const hours = doctor.schedule[days[0]].map((slot) => slot.time);
-  mereSchedules(doctor);
+  function getDayslots(day) {
+    if (Array.isArray(schedulesData)) {
+      const found = schedulesData.find((D) => Array.isArray(D) && D[0] == day);
+      return found ? found[1] : [];
+    }
+    return schedulesData[day] || schedulesData.reason || [];
+  }
+
+  const schedulesData = mergSchedules(doctor);
+  if (!schedulesData) return null;
+  console.log(schedulesData);
+  const days = Array.isArray(doctor)
+    ? Object.keys(schedulesData)
+    : schedulesData.days;
+  const hours = Array.isArray(doctor)
+    ? Object.entries(schedulesData)[0][1].map((slot) => slot.time)
+    : schedulesData.hours;
+
   function handleReasons(reason) {
     switch (reason) {
       case "Lunch Break":
@@ -35,7 +55,6 @@ const AppointmentTable = ({ doctor }) => {
         return { backgroundColor: "#07680B" };
       case "Reserved":
         return { backgroundColor: "#CB2020" };
-
       case "Personal":
         return { backgroundColor: "#AC510B" };
       case "Meeting":
@@ -82,8 +101,10 @@ const AppointmentTable = ({ doctor }) => {
               </td>
 
               {days.map((day, j) => {
-                const slot = doctor.schedule[day][i];
-
+                const Shuffleslots = getDayslots(day);
+                const slot = Array.isArray(Shuffleslots[i])
+                  ? { reason: Shuffleslots[i][j] || "" }
+                  : Shuffleslots[i] || [];
                 return (
                   <td
                     key={j}

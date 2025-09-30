@@ -111,11 +111,9 @@
   box-sizing: border-box;
   pointer-events: none;
 
-  /* egyszer lefutó körbefutás */
   animation: border-rotate 4s linear forwards, color-change 9s linear infinite;
 }
 
-/* egyszer lefutó animáció a borderhez */
 @keyframes border-rotate {
   0% {
     clip-path: inset(0 0% 100% 0);
@@ -126,7 +124,6 @@
   }
 }
 
-/* folyamatos RGB színváltozás, a körbefutás után indul */
 @keyframes color-change {
   0% {
     border-color: rgb(122, 184, 176);
@@ -169,6 +166,17 @@
   animation: border-slide 1.5s ease-in forwards;
 }
 
+@keyframes meteorMove {
+  0% {
+    transform: translate(0, 0) rotate(-45deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(50vw);
+    opacity: 0;
+  }
+}
+
 @layer utilities {
   .animate-fadeInScale {
     animation: fadeInThenScale 1.2s ease-in-out forwards;
@@ -194,6 +202,11 @@
   }
   .animate-slide-left {
     animation: slideInLeft 0.5s ease forwards;
+  }
+
+  .animate-meteor {
+    animation: meteorMove 10s linear forwards;
+    transform-origin: top left;
   }
 }
 

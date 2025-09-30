@@ -82,8 +82,9 @@ const HomePage = () => {
     );
     if (samedoctors.length > 1) {
       setSelectedDoctor(samedoctors);
+    } else {
+      setSelectedDoctor(doctor);
     }
-    setSelectedDoctor([doctor]);
   };
 
   return (
@@ -134,11 +135,11 @@ const HomePage = () => {
           </h1>
         </div>
         <div className="py-10 md:px-12 lg:py-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10 px-10 ">
-          {Object.values(Doctors).map((doctor) => (
+          {Object.values(Doctors).map((doctor, index) => (
             <div
               className="animate-fadeInBottom"
               onClick={() => handleClick(doctor)}
-              key={doctor.id}
+              key={index}
             >
               <Link to={`/Appointment/${doctor.fullname} `}>
                 <Card className="h-full flex flex-col hover-border-animate cursor-pointer hover:border-3  max-w-sm  border">
