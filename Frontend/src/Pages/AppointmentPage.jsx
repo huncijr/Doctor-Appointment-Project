@@ -3,6 +3,7 @@ import { useDoctor } from "../Context/DoctorContext.jsx";
 import { use, useEffect } from "react";
 import { Button } from "flowbite-react";
 import AppointmentTable from "../Components/Table.jsx";
+import { Link } from "react-router-dom";
 const AppointmentPage = () => {
   const { selecteddoctor, setSelectedDoctor } = useDoctor();
 
@@ -46,9 +47,11 @@ const AppointmentPage = () => {
               </div>
 
               <div className="flex flex-col items-center mt-4 gap-3 px-4 pb-4">
-                <Button className="rounded-full w-full bg-gradient-to-r from-secondary via-blue-secondary to-primary text-white hover:bg-gradient-to-br">
-                  Add an appointment
-                </Button>
+                <Link to={`/AddAppointment/${selecteddoctor.fullname}`}>
+                  <Button className="rounded-full w-full bg-gradient-to-r from-secondary via-blue-secondary to-primary text-white hover:bg-gradient-to-br">
+                    Add an appointment
+                  </Button>
+                </Link>
                 <Button color="light" pill className="w-full">
                   VIEW MY APPOINTMENTS
                 </Button>
@@ -96,9 +99,11 @@ const AppointmentPage = () => {
                   </div>
 
                   <div className="flex flex-col items-center mt-4 gap-3 px-4 pb-4">
-                    <Button className="rounded-full w-full bg-gradient-to-r from-secondary via-blue-secondary to-primary text-white hover:bg-gradient-to-br">
-                      Add an appointment
-                    </Button>
+                    <Link to={`/AddAppointment/${doctor.fullname}`}>
+                      <Button className="rounded-full w-full bg-gradient-to-r from-secondary via-blue-secondary to-primary text-white hover:bg-gradient-to-br">
+                        Add an appointment
+                      </Button>
+                    </Link>
                     <Button color="light" pill className="w-full">
                       VIEW MY APPOINTMENTS
                     </Button>

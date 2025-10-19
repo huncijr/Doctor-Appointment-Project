@@ -55,9 +55,7 @@ const Meteors = () => {
             left: `${meteor.x}%`,
             top: `${meteor.y}px`,
           }}
-        >
-          {console.log(meteor.x)}
-        </div>
+        ></div>
       ))}
     </div>
   );

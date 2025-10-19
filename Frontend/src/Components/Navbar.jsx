@@ -7,7 +7,7 @@ const Navbar = () => {
       className="animate-fadeInRight mt-7 sm:mt-12
              flex flex-col sm:flex-row items-center justify-center gap-4  [&>*]:cursor-pointer
              [&>*]:border-y-2 [&>*]:transition-colors [&>*]:duration-500 
-             [&>*]:text-xl sm:[&>*]:text-2xl lg:[&>*]:text-3xl
+             [&>*]:text-xl sm:[&>*]:text-xl lg:[&>*]:text-2xl font-[changa-one]
              [&>*:hover]:text-secondary [&>*:hover]:border-secondary"
     >
       <NavLink

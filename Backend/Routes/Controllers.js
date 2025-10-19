@@ -4,16 +4,25 @@ import { Appointment, User } from "../DataBase/Schemas.js";
 
 export const GetRegistration = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
-    const UserExists = await User.findOne({ email });
+    const { username, fullname, password, gender, age } = req.body;
+    const UserExists = await User.findOne({ fullname });
     if (UserExists) {
       return res.status(400).json({ message: "User already exists" });
     }
-    const user = await User.create({ username, email, password });
+    const user = await User.create({
+      username,
+      fullname,
+      password,
+      gender,
+      age,
+    });
     res.status(201).json({
       _id: user._id,
       username: user.username,
-      email: user.email,
+      fullname: user.fullname,
+      password: user.password,
+      gender: user.gender,
+      registered: user.registered,
       token: generateToken(user._id),
     });
   } catch (error) {
@@ -23,8 +32,8 @@ export const GetRegistration = async (req, res) => {
 
 export const GetLogin = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const { fullname, password } = req.body;
+    const user = await User.findOne({ fullname });
 
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: "Invalid e-mail or password" });
@@ -33,7 +42,7 @@ export const GetLogin = async (req, res) => {
     res.json({
       _id: user._id,
       username: user.username,
-      email: user.email,
+      fullname: user.fullname,
       token: generateToken(user._id),
     });
   } catch (error) {

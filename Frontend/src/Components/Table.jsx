@@ -39,7 +39,7 @@ const AppointmentTable = ({ doctor }) => {
 
   const schedulesData = mergSchedules(doctor);
   if (!schedulesData) return null;
-  console.log(schedulesData);
+  //console.log(schedulesData);
   const days = Array.isArray(doctor)
     ? Object.keys(schedulesData)
     : schedulesData.days;
@@ -65,17 +65,19 @@ const AppointmentTable = ({ doctor }) => {
         return {};
     }
   }
+  function handleClickBack() {}
+  function handleClickForward() {}
 
   return (
     <div className="overflow-x-auto bg-white">
       <div className="flex justify-between text-center items-center">
-        <span className="px-10">
+        <button className="px-10" onClick={handleClickBack}>
           <StepBack />
-        </span>
+        </button>
         <h1 className="py-10 text-xl font-bold">THIS WEEK</h1>
-        <span className="px-10">
+        <button onClick={handleClickForward} className="px-10">
           <StepForward />
-        </span>
+        </button>
       </div>
 
       <table className="border-collapse border border-gray-400 w-full text-center">

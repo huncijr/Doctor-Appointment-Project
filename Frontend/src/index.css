@@ -7,18 +7,24 @@
   font-weight: 500;
   font-style: normal;
 }
+.changa-one {
+  font-family: "Changa One", sans-serif;
+}
+.lora {
+  font-family: "Lora", sans-serif;
+}
 @keyframes fadeInThenScale {
   0% {
     opacity: 0;
     transform: scale(0.5);
   }
   50% {
-    opacity: 1; /* csak bejön az opacity */
+    opacity: 1;
     transform: scale(0.5);
   }
   100% {
     opacity: 1;
-    transform: scale(1); /* utána tágul a méret */
+    transform: scale(1);
   }
 }
 @keyframes scaleUp {
@@ -207,6 +213,16 @@
   .animate-meteor {
     animation: meteorMove 10s linear forwards;
     transform-origin: top left;
+    @keyframes meteorMove {
+      0% {
+        transform: translate(0, 0) rotate(-45deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) translateX(50vw);
+        opacity: 0;
+      }
+    }
   }
 }
 
