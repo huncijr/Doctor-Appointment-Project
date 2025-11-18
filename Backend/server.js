@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import AppRoutes from "./Routes/Allroutes.js";
+import path from "path";
 import { connectDB } from "./DataBase/MongoDB.js";
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use("/Doctorspic", express.static(path.join(process.cwd(), "Doctorspic")));
 app.use("/API", AppRoutes);
 
 app.listen(PORT, () => {

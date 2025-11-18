@@ -143,32 +143,21 @@ const LoginPage = () => {
     if (!validPassword) return;
     if (!handleRepeatPassword(password, confirmpassword)) return;
     try {
-      let response;
-      if (cookies) {
-        response = await API.post(
-          "/Signup",
-          {
-            fullname: processedFullname,
-            age: validAge,
-            username: validUser,
-            password: validPassword,
-            gender: gender,
-            registered: true,
-          },
-          {
-            withCredentials: true,
-          }
-        );
-      } else {
-        response = await API.post("/Signup", {
+      let response = await API.post(
+        "/Signup",
+        {
           fullname: processedFullname,
           age: validAge,
           username: validUser,
           password: validPassword,
           gender: gender,
           registered: true,
-        });
-      }
+          cookies,
+        },
+        {
+          withCredentials: true,
+        }
+      );
       if (!cookies) {
         sessionStorage.setItem("user", JSON.stringify(response.data));
       }
@@ -176,7 +165,7 @@ const LoginPage = () => {
       console.log(user);
     } catch (error) {
       if (error.response && error.response.status === 400) {
-        toast.error("Fullname is already created");
+        toast.error("User name is already taken!");
       } else {
         console.error(error);
       }
@@ -193,28 +182,23 @@ const LoginPage = () => {
       return false;
     }
     try {
-      let response;
-      if (cookies) {
-        response = await API.post(
-          "/Login",
-          {
-            username: loginusername,
-            password: loginpassword,
-          },
-          {
-            withCredentials: true,
-          }
-        );
-      } else {
-        response = await API.post("/Login", {
+      let response = await API.post(
+        "/Login",
+        {
           username: loginusername,
           password: loginpassword,
-        });
-      }
+          cookies,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
       if (!cookies) {
         sessionStorage.setItem("user", JSON.stringify(response.data));
       }
       setUser(response.data);
+      console.log(user);
       toast.success(`Welcome ${response.data.fullname}`);
     } catch (error) {
       if (error.response && error.response.status === 401) {

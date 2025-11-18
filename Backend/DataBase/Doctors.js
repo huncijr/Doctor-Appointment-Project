@@ -1,3 +1,10 @@
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+import { Doctor } from "./Schemas.js";
+
+dotenv.config();
+
 const reasons = [
   "Lunch Break",
   "Meeting",
@@ -11,8 +18,7 @@ export const Doctors = {
     fullname: "Dr. John Smith",
     occupation: "Cardiologist",
     description: "Expert in heart-related illnesses and treatments.",
-    img: "",
-    id: 1,
+    img: "/Doctorspic/doctor5.png",
     schedule: {
       Monday: [
         { time: "10 AM", reason: "" },
@@ -65,8 +71,7 @@ export const Doctors = {
     fullname: "Dr. Emily Johnson",
     occupation: "Dermatologist",
     description: "Specialist in skin conditions and cosmetic treatments.",
-    img: "",
-    id: 2,
+    img: "/Doctorspic/doctor2.png",
     schedule: {
       Monday: [
         { time: "8 AM", reason: "" },
@@ -120,8 +125,7 @@ export const Doctors = {
     fullname: "Dr. Michael Brown",
     occupation: "Surgeon",
     description: "Performs surgical operations with high precision and care.",
-    img: "",
-    id: 3,
+    img: "/Doctorspic/doctor3.png",
     schedule: {
       Monday: [
         { time: "10 AM", reason: "" },
@@ -175,8 +179,7 @@ export const Doctors = {
     fullname: "Dr. Sarah Williams",
     occupation: "Neurologist",
     description: "Expert in treating brain, spinal cord, and nerve disorders.",
-    img: "",
-    id: 4,
+    img: "/Doctorspic/doctor4.png",
     schedule: {
       Monday: [
         { time: "12 PM", reason: reasons[0] },
@@ -239,8 +242,7 @@ export const Doctors = {
     fullname: "Dr. David Lee",
     occupation: "Orthopedic Specialist",
     description: "Treats bone, joint, and muscle conditions effectively.",
-    img: "",
-    id: 5,
+    img: "/Doctorspic/doctor5.png",
     schedule: {
       Monday: [
         { time: "9 AM", reason: "" },
@@ -295,8 +297,7 @@ export const Doctors = {
     occupation: "Surgeon",
     description:
       "Experienced surgeon with expertise in general and emergency operations.",
-    img: "",
-    id: 6,
+    img: "/Doctorspic/doctor6.png",
     schedule: {
       Monday: [
         { time: "4 PM", reason: "" },
@@ -349,8 +350,7 @@ export const Doctors = {
     fullname: "Dr. James Anderson",
     occupation: "General Practitioner",
     description: "Focuses on mental health and psychological disorders.",
-    img: "",
-    id: 6,
+    img: "/Doctorspic/doctor7.png",
     schedule: {
       Monday: [
         { time: "10 AM", reason: "" },
@@ -403,8 +403,7 @@ export const Doctors = {
     fullname: "Dr. Sophia Thomas",
     occupation: "General Practitioner",
     description: "Provides overall medical care for all ages.",
-    img: "",
-    id: 7,
+    img: "/Doctorspic/doctor8.png",
     schedule: {
       Monday: [
         { time: "5 AM", reason: "" },
@@ -449,3 +448,13 @@ export const Doctors = {
     },
   },
 };
+
+mongoose
+  .connect(process.env.MONGODB)
+  .then(async () => {
+    await Doctor.deleteMany();
+    await Doctor.insertMany(Object.values(Doctors));
+    console.log("Doctors inserted");
+    process.exit();
+  })
+  .catch((err) => console.log(err));

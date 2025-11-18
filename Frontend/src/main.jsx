@@ -9,12 +9,12 @@ import { CookieProvider } from "./Context/Cookies.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <CookieProvider>
+      <CookieProvider>
+        <AuthProvider>
           <CookieUI />
           <App />
-        </CookieProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </CookieProvider>
     </BrowserRouter>
   </StrictMode>
 );

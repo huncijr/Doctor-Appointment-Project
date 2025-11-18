@@ -16,8 +16,7 @@ import placeinside from "../Places/placeinside.png";
 import placeoutside from "../Places/placeoutside.png";
 import place3 from "../Places/place3.png";
 import { useDoctor } from "../Context/DoctorContext.jsx";
-import { Link } from "react-router-dom";
-import { Doctors } from "../Context/Doctors.js";
+import { Link, useNavigate } from "react-router-dom";
 
 const HomePage = () => {
   const [slide, setSlide] = useState([placeoutside, placeinside, place3]);
@@ -27,6 +26,23 @@ const HomePage = () => {
   const [slidedirection, setSlideDirection] = useState("right");
   const intervalRef = useRef(null);
   const { selecteddoctor, setSelectedDoctor } = useDoctor();
+  const [doctors, setDoctors] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const getDoctors = async () => {
+      try {
+        const res = await API.get("/AllDoctor");
+        setDoctors(res.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getDoctors();
+  }, []);
+  useEffect(() => {
+    console.log(doctors);
+  }, [doctors]);
 
   useEffect(() => {
     let current = 0;
@@ -76,14 +92,18 @@ const HomePage = () => {
     }, 50);
   }
 
-  const handleClick = (doctor) => {
-    const samedoctors = Object.values(Doctors).filter(
-      (d) => d.occupation === doctor.occupation
-    );
-    if (samedoctors.length > 1) {
-      setSelectedDoctor(samedoctors);
-    } else {
-      setSelectedDoctor(doctor);
+  const handleClick = async (doctor) => {
+    try {
+      const res = await API.get(`Doctor?occupation=${doctor.occupation}`);
+      if (res.data.length > 1) {
+        setSelectedDoctor(res.data);
+      } else {
+        setSelectedDoctor(res.data[0]);
+      }
+      console.log(res.data);
+      navigate(`/Appointment/${doctor.fullname}`);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -135,18 +155,18 @@ const HomePage = () => {
           </h1>
         </div>
         <div className="py-10 md:px-12 lg:py-14 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10 px-10 ">
-          {Object.values(Doctors).map((doctor, index) => (
-            <div
-              className="animate-fadeInBottom"
-              onClick={() => handleClick(doctor)}
-              key={index}
-            >
-              <Link to={`/Appointment/${doctor.fullname} `}>
+          {doctors &&
+            Object.values(doctors).map((doctor) => (
+              <div
+                className="animate-fadeInBottom"
+                onClick={() => handleClick(doctor)}
+                key={doctor._id}
+              >
                 <Card className="h-full flex flex-col hover-border-animate cursor-pointer hover:border-3  max-w-sm  border">
                   <div className="flex-1 flex flex-col p-1 ">
                     <figure className="h-80 overflow-hidden rounded-md w-full object-cover border-b-2 py-2 mb-2 border-secondary">
                       <img
-                        src={doctor.img}
+                        src={`http://localhost:5001${doctor.img}`}
                         alt="No image "
                         className="text-white w-full h-full object-cover  min-w-[100%] min-h-[100%]"
                       />
@@ -162,9 +182,8 @@ const HomePage = () => {
                     </p>
                   </div>
                 </Card>
-              </Link>
-            </div>
-          ))}
+              </div>
+            ))}
         </div>
         <div className="mt-10 px-5">
           <div className="animate-fadeInScale">

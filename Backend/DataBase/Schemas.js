@@ -1,10 +1,30 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+const ScheduleSchema = new mongoose.Schema({
+  time: String,
+  reason: String,
+});
+const DoctorSchema = new mongoose.Schema({
+  fullname: String,
+  occupation: String,
+  description: String,
+  img: String,
+  id: Number,
+  schedule: {
+    Monday: [ScheduleSchema],
+    Tuesday: [ScheduleSchema],
+    Wednesday: [ScheduleSchema],
+    Thursday: [ScheduleSchema],
+    Friday: [ScheduleSchema],
+    Saturday: { type: [ScheduleSchema], default: undefined },
+  },
+});
+
 const UserSchema = new mongoose.Schema(
   {
-    username: { type: String, required: true },
-    fullname: { type: String, required: true, unique: true },
+    username: { type: String, required: true, unique: true },
+    fullname: { type: String, required: true },
     password: { type: String, required: true },
     gender: { type: String, required: true },
     age: { type: Number, required: true },
@@ -41,14 +61,22 @@ const AppointmentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    user: {
+    userid: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+    },
+    time: {
+      type: String,
+      required: true,
+    },
+    message: {
+      type: String,
       required: true,
     },
   },
   { timestamps: true }
 );
-
+export const Doctor = mongoose.model("Doctor", DoctorSchema);
 export const User = mongoose.model("User", UserSchema);
 export const Appointment = mongoose.model("Appointment", AppointmentSchema);

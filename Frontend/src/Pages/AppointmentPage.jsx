@@ -11,6 +11,10 @@ const AppointmentPage = () => {
     ? selecteddoctor
     : [selecteddoctor];
 
+  useEffect(() => {
+    console.log(selecteddoctor);
+  }, [selecteddoctor]);
+
   return (
     <div className="relative flex flex-col justify-center z-10 w-full ">
       <NavBar />

@@ -5,22 +5,24 @@ const CookieContext = createContext();
 export const CookieProvider = ({ children }) => {
   const [cookies, setCookies] = useState(false);
   useEffect(() => {
-    const saved = sessionStorage.getItem("Cookies");
+    const saved = localStorage.getItem("Cookies");
     if (saved) setCookies(saved === "true");
   }, []);
   const acceptCookies = () => {
-    sessionStorage.setItem("Cookies", "true");
+    localStorage.setItem("Cookies", "true");
     setCookies(true);
   };
   const declineCookies = () => {
-    sessionStorage.setItem("Cookies", "false");
+    localStorage.setItem("Cookies", "false");
     setCookies(false);
   };
   useEffect(() => {
     console.log(cookies);
   }, [cookies]);
   return (
-    <CookieContext.Provider value={{ cookies, acceptCookies, declineCookies }}>
+    <CookieContext.Provider
+      value={{ cookies, setCookies, acceptCookies, declineCookies }}
+    >
       {children}
     </CookieContext.Provider>
   );
