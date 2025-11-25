@@ -10,12 +10,10 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await API.get("/checkAuth", { withCredentials: true });
         if (response.data.loggedIn) {
-          console.log("ez lefutott");
           setUser(response.data.user);
-          console.log(response.data.user);
         }
       } catch (error) {}
-      const savedUser = sessionStorage.getItem("user");
+      const savedUser = localStorage.getItem("user");
       if (savedUser) {
         try {
           const parsedUser = JSON.parse(savedUser);

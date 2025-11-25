@@ -33,9 +33,9 @@ const CookieUI = () => {
             </h5>
             <p className="mb-5 text-base text-gray-500 sm:text-lg dark:text-gray-400">
               Cookies help us improve your experience by remembering your
-              preferences, login sessions, and visited pages. You can choose to
-              accept or decline them — accepting cookies allows us to provide a
-              more personalized and secure browsing experience.
+              preferences, login , and visited pages. You can choose to accept
+              or decline them — accepting cookies allows us to provide a more
+              personalized and secure browsing experience.
             </p>
             <div className="flex justify-evenly gap-2">
               <Button

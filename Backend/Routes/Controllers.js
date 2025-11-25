@@ -17,7 +17,6 @@ export const GetDoctors = async (req, res) => {
 export const GetDoctorsById = async (req, res) => {
   try {
     const { occupation } = req.query;
-    console.log("lefutottam");
     const doctors = await Doctor.find({ occupation: occupation });
     res.json(doctors);
   } catch (error) {
@@ -30,7 +29,6 @@ export const GetRegistration = async (req, res) => {
   try {
     const { fullname, age, username, password, gender, registered, cookies } =
       req.body;
-    console.log("az ev:", age);
     const UserExists = await User.findOne({ username });
     if (UserExists) {
       return res.status(400).json({ message: "User already exists" });
@@ -123,11 +121,14 @@ export const MakeAnAppointment = async (req, res) => {
       req.body;
     let user = await User.findOne({ username });
     if (!user) return res.status(404).json({ Message: "User was not found" });
-    const appointment = Appointment.create({
+    const selecteddoctor = await Doctor.findById(doctor);
+    if (!selecteddoctor)
+      return res.status(4040).json({ Message: "Doctor was not found!" });
+    const appointment = await Appointment.create({
       userid: id,
+      doctor: doctor,
       fullname,
       age,
-      doctor,
       date,
       time,
       message,
@@ -139,6 +140,30 @@ export const MakeAnAppointment = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
+  }
+};
+export const GetAppointment = async (req, res) => {
+  const { userid } = req.query;
+  console.log("lefutottam");
+  try {
+    const user = await User.findById(userid);
+    console.log(user);
+    if (!user) {
+      return res.status(404).json({ message: "User was NOT found" });
+    }
+
+    const appointments = await Appointment.find({
+      user: userid,
+    });
+    if (!appointments || appointments.length === 0) {
+      return res.status(404).json({ message: "Appointment was NOT found" });
+    }
+    return res.status(200).json({
+      appointments,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 

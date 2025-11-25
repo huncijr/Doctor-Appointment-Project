@@ -159,7 +159,7 @@ const LoginPage = () => {
         }
       );
       if (!cookies) {
-        sessionStorage.setItem("user", JSON.stringify(response.data));
+        localStorage.setItem("user", JSON.stringify(response.data));
       }
       setUser(response.data);
       console.log(user);
@@ -195,7 +195,7 @@ const LoginPage = () => {
       );
 
       if (!cookies) {
-        sessionStorage.setItem("user", JSON.stringify(response.data));
+        localStorage.setItem("user", JSON.stringify(response.data));
       }
       setUser(response.data);
       console.log(user);
@@ -213,7 +213,7 @@ const LoginPage = () => {
       let userdelete = await API.delete(`/delete/${user._id}`, {
         withCredentials: true,
       });
-      sessionStorage.removeItem("user");
+      localStorage.removeItem("user");
       declineCookies();
       setUser(null);
       setFullName("");

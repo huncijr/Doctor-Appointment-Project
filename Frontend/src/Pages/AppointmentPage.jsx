@@ -32,7 +32,7 @@ const AppointmentPage = () => {
             <div className=" flex-1 flex flex-col border-4 border-animated sm:w-2/3">
               <div className="relative overflow-hidden rounded-md h-0 pb-[100%]">
                 <img
-                  src={selecteddoctor.img}
+                  src={`http://localhost:5001${selecteddoctor.img}`}
                   alt={selecteddoctor.fullname}
                   className="absolute top-0 left-0 w-full h-full object-cover text-white"
                 />
@@ -86,7 +86,7 @@ const AppointmentPage = () => {
                 >
                   <div className="relative overflow-hidden rounded-md h-0 pb-[100%]">
                     <img
-                      src={doctor.img}
+                      src={`http://localhost:5001${doctor.img}`}
                       alt={doctor.fullname}
                       className="absolute top-0 left-0 w-full h-full object-cover text-white"
                     />

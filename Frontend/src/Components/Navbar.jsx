@@ -17,7 +17,7 @@ const Navbar = () => {
         Home
       </NavLink>
       <NavLink
-        to="/Appointment"
+        to="/MyAppointments"
         className={({ isActive }) => `${isActive ? activeStyle : "text-white"}`}
       >
         APPOINTMENTS

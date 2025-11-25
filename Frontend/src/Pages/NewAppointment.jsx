@@ -161,7 +161,7 @@ const NewAppointment = () => {
         username: user.username,
         fullname: user.fullname,
         age: user.age,
-        doctor: selecteddoctor.fullname,
+        doctor: selecteddoctor._id,
         date: selecteddate,
         time: time,
         message: message,
