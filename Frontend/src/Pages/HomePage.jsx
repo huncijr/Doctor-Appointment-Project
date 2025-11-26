@@ -41,8 +41,8 @@ const HomePage = () => {
     getDoctors();
   }, []);
   useEffect(() => {
-    console.log(doctors);
-  }, [doctors]);
+    setSelectedDoctor([]);
+  }, []);
 
   useEffect(() => {
     let current = 0;

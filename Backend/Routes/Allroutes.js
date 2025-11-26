@@ -5,9 +5,11 @@ import {
   GetRegistration,
   GetLogin,
   DeleteUser,
+  SignOutUser,
   Protect,
   MakeAnAppointment,
   GetAppointment,
+  DeleteAppointment,
 } from "./Controllers.js";
 
 const AppRoutes = express.Router();
@@ -16,8 +18,10 @@ AppRoutes.get("/Doctor", GetDoctorsById);
 AppRoutes.post("/Signup", GetRegistration);
 AppRoutes.post("/Login", GetLogin);
 AppRoutes.delete("/Delete/:id", DeleteUser);
+AppRoutes.post("/SignOut", SignOutUser);
 AppRoutes.post("/Appointment", MakeAnAppointment);
 AppRoutes.get("/GetAppointment", GetAppointment);
+AppRoutes.delete("/DeleteAppointment", DeleteAppointment);
 AppRoutes.get("/checkAuth", Protect, (req, res) => {
   res.json({
     loggedIn: true,

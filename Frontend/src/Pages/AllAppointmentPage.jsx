@@ -14,16 +14,23 @@ import {
   ModalHeader,
   Card,
 } from "flowbite-react";
-import { ShieldX } from "lucide-react";
+import { ShieldX, Trash2 } from "lucide-react";
 import { API } from "../Context/AppointmentAPI";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../Context/CheckAuth";
 import { Link } from "react-router-dom";
+import { Appointment } from "../../../Backend/DataBase/Schemas";
+import axios from "axios";
+import getstarted from "../other pics/getstarted.png";
 
 const AllAppointmentPage = () => {
   const { user, setUser } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [waitdelete, setWaitDelete] = useState(false);
+  const [deletetimeout, setDeleteTimeout] = useState(null);
+
+  const CancelDelete = useRef();
   useEffect(() => {
     const fetchAppointment = async () => {
       try {
@@ -32,10 +39,9 @@ const AllAppointmentPage = () => {
             userid: user._id,
           },
         });
-        setAppointments(res.data);
+        setAppointments(res.data.appointments);
       } catch (error) {
         if (error.response && error.response.status === 404) {
-          console.log("nem kaptam");
           return;
         }
         console.log(error);
@@ -50,45 +56,137 @@ const AllAppointmentPage = () => {
   useEffect(() => {
     console.log(appointments);
   }, [appointments]);
+
+  const SplitDate = (date) => {
+    let newdate = date.slice(0, date.indexOf("T"));
+    return newdate;
+  };
+  const SplitMessage = (message, length) => {
+    const newlength =
+      message.length > length ? message.slice(0, length) + "..." : message;
+    return newlength;
+  };
+  const handleCancel = () => {
+    if (CancelDelete.current) {
+      CancelDelete.current.abort();
+    }
+    if (deletetimeout) clearTimeout(deletetimeout), setDeleteTimeout(null);
+    setWaitDelete(false);
+  };
+  const DeleteAppointment = (id) => {
+    console.log(id);
+    const controller = new AbortController();
+    CancelDelete.current = controller;
+    setWaitDelete(true);
+    const timeout = setTimeout(async () => {
+      try {
+        await API.delete("/DeleteAppointment", {
+          data: { appointmentid: id },
+          signal: controller.signal,
+        });
+        setAppointments((prev) =>
+          prev.filter((appointment) => appointment._id !== id)
+        );
+      } catch (error) {
+        if (error.name === "CanceledError" || error.name === "AbortError") {
+          console.log("Delete Canceled");
+        } else {
+          console.error(error);
+        }
+      } finally {
+        setDeleteTimeout(null);
+        setWaitDelete(false);
+      }
+    }, 2000);
+    setDeleteTimeout(timeout);
+  };
   return (
     <div>
       <div className="relative flex flex-col items-center z-10">
         <Navbar />
         {user ? (
           !loading ? (
-            appointments ? (
-              <div className="flex flex-col items-center">
-                <div className="py-10 overflow-x-auto">
-                  <Table striped>
-                    <TableHead>
-                      <TableHeadCell>Doctor</TableHeadCell>
-                      <TableHeadCell>Date</TableHeadCell>
-                      <TableHeadCell>Time</TableHeadCell>
-                      <TableHeadCell>Name</TableHeadCell>
-                      <TableHeadCell>Delete</TableHeadCell>
-                    </TableHead>
-                    <TableBody className="divide-y">
-                      <TableRow className="bg-white dark:border-gray-700 dark:bg-gray-800">
-                        <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                          aaa
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+            appointments && appointments.length > 0 ? (
+              <div className="py-10 w-full flex flex-col items-center justify-center">
+                <div className="flex justify-center py-10">
+                  <h1 className="px-5 border-x-2 text-2xl md:text-3xl text-secondary border-secondary  hover-doubleline">
+                    My Appointments
+                  </h1>
+                </div>
+                <div className="w-full max-w-[90%] overflow-x-auto">
+                  <div className="inline-block sm:min-w-[0%]">
+                    <Table striped className=" ">
+                      <TableHead>
+                        <TableHeadCell>Doctor</TableHeadCell>
+                        <TableHeadCell>Date</TableHeadCell>
+                        <TableHeadCell>Time</TableHeadCell>
+                        <TableHeadCell>Message</TableHeadCell>
+                        <TableHeadCell>Delete</TableHeadCell>
+                      </TableHead>
+                      <TableBody className="divide-y">
+                        {appointments.map((appointment) => (
+                          <TableRow
+                            className="bg-white dark:border-gray-700 dark:bg-gray-800 font-bold lora"
+                            key={appointment._id}
+                          >
+                            <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                              {appointment.doctorname}
+                            </TableCell>
+                            <TableCell>{SplitDate(appointment.date)}</TableCell>
+                            <TableCell>{appointment.time}</TableCell>
+                            <TableCell>
+                              {SplitMessage(appointment.message, 120)}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                color="red"
+                                className="border-2 rounded-full"
+                                onClick={() =>
+                                  DeleteAppointment(appointment._id)
+                                }
+                              >
+                                <Trash2 />
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div>
-                <Card className="max-w-sm" imgSrc="" horizontal>
-                  <h5 className="lora text-lg text-secondary">
-                    {" "}
-                    You dont have any appointment
-                  </h5>
-                  <p className="text-sm anton-regular">
-                    To get started select a doctor and make sure to get an
-                    appointment!
-                  </p>
-                  <Button>Get Started</Button>
+              <div className="py-10">
+                <Card className="max-w-sm w-full" horizontal>
+                  <div className="flex ">
+                    <div className="flex flex-[0.4] items-center px-5  ">
+                      <figure className="w-full h-full overflow-hidden">
+                        <img
+                          src={getstarted}
+                          alt="GetStarted.jpg"
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      </figure>
+                    </div>
+                    <div className="flex flex-col justify-center px-2">
+                      <div className="w-1 bg-green-800 h-full mx-2 "></div>
+                    </div>
+                    <div className="flex flex-[0.6] flex-col gap-3 text-center justify-center ">
+                      <h5 className=" text-lg font-bold text-secondary">
+                        {" "}
+                        You dont have any appointment!
+                      </h5>
+                      <p className="text-sm md:text-lg lora text-white tracking-wider">
+                        To get started select a doctor and make sure to get an
+                        appointment!
+                      </p>
+                      <div className="flex justify-end">
+                        <Button color="green" className="w-[45%]">
+                          <Link to={"/Home"}>Get Started</Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
                 </Card>
               </div>
             )
@@ -116,6 +214,30 @@ const AllAppointmentPage = () => {
           </div>
         )}
       </div>
+      {waitdelete && (
+        <div className="fixed inset-0 z-50 backdrop:blur-sm bg-black/30">
+          <div className="flex items-center justify-center relative h-screen">
+            <Card className="min-w-[45%] min-h-[30%] bg-black/40">
+              <div className="flex flex-col justify-center items-center py-5 ">
+                <h5 className="changa-one text-white font-bold py-5 text-2xl">
+                  Deleting Appointment !
+                </h5>
+                <div className="py-5 ">
+                  <Spinner color="failure" aria-label="Failure" />
+                </div>
+              </div>
+              <Button
+                color="red"
+                className="text-white relative right-0"
+                pill
+                onClick={handleCancel}
+              >
+                Cancel...
+              </Button>
+            </Card>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

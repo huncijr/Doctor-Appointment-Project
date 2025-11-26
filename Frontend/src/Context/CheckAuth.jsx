@@ -11,6 +11,8 @@ export const AuthProvider = ({ children }) => {
         const response = await API.get("/checkAuth", { withCredentials: true });
         if (response.data.loggedIn) {
           setUser(response.data.user);
+          setCookies(true);
+          return;
         }
       } catch (error) {}
       const savedUser = localStorage.getItem("user");
@@ -18,7 +20,6 @@ export const AuthProvider = ({ children }) => {
         try {
           const parsedUser = JSON.parse(savedUser);
           setUser(parsedUser);
-          setCookies();
         } catch (error) {
           console.error(error);
         }

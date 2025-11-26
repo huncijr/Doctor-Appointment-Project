@@ -115,18 +115,42 @@ export const DeleteUser = async (req, res) => {
   }
 };
 
+export const SignOutUser = async (req, res) => {
+  try {
+    res.clearCookie("jwt", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    return res.status(200).json({ message: "Logged out succesfully" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error " });
+  }
+};
+
 export const MakeAnAppointment = async (req, res) => {
   try {
-    const { fullname, username, id, age, doctor, date, time, message } =
-      req.body;
+    const {
+      fullname,
+      username,
+      id,
+      age,
+      doctorid,
+      doctorname,
+      date,
+      time,
+      message,
+    } = req.body;
     let user = await User.findOne({ username });
     if (!user) return res.status(404).json({ Message: "User was not found" });
-    const selecteddoctor = await Doctor.findById(doctor);
+    const selecteddoctor = await Doctor.findById(doctorid);
     if (!selecteddoctor)
       return res.status(4040).json({ Message: "Doctor was not found!" });
     const appointment = await Appointment.create({
       userid: id,
-      doctor: doctor,
+      doctorid,
+      doctorname,
       fullname,
       age,
       date,
@@ -135,7 +159,7 @@ export const MakeAnAppointment = async (req, res) => {
     });
     res.status(201).json({
       date,
-      doctor,
+      doctorid,
     });
   } catch (error) {
     console.error(error);
@@ -144,17 +168,16 @@ export const MakeAnAppointment = async (req, res) => {
 };
 export const GetAppointment = async (req, res) => {
   const { userid } = req.query;
-  console.log("lefutottam");
   try {
     const user = await User.findById(userid);
-    console.log(user);
     if (!user) {
       return res.status(404).json({ message: "User was NOT found" });
     }
 
     const appointments = await Appointment.find({
-      user: userid,
+      userid,
     });
+    console.log(appointments);
     if (!appointments || appointments.length === 0) {
       return res.status(404).json({ message: "Appointment was NOT found" });
     }
@@ -164,6 +187,22 @@ export const GetAppointment = async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+export const DeleteAppointment = async (req, res) => {
+  try {
+    const { appointmentid } = req.body;
+    console.log("lefutottam");
+    const appointment = await Appointment.findById(appointmentid);
+    if (!appointment) {
+      return res.status(404).json({ message: "Appointment wasnt found" });
+    }
+    if (appointment) {
+      await Appointment.findByIdAndDelete(appointmentid);
+    }
+    res.status(200).json({ message: "Appointment was succesfully deleted" });
+  } catch (error) {
+    console.error(error);
   }
 };
 

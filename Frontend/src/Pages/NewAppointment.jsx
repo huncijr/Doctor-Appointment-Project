@@ -32,7 +32,7 @@ const NewAppointment = () => {
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
 
-  const { selecteddoctor } = useDoctor();
+  const { selecteddoctor, setSelectedDoctor } = useDoctor();
   const { user, setUser } = useAuth();
   const { cookies } = useCookie();
 
@@ -96,24 +96,24 @@ const NewAppointment = () => {
   function formatDate(date) {
     if (!date) return;
     const MonthDate = {
-      January: 1,
-      February: 2,
-      March: 3,
-      April: 4,
-      May: 5,
-      June: 6,
-      July: 7,
-      August: 8,
-      September: 9,
-      October: 10,
-      November: 11,
-      December: 12,
+      January: 0,
+      February: 1,
+      March: 2,
+      April: 3,
+      May: 4,
+      June: 5,
+      July: 6,
+      August: 7,
+      September: 8,
+      October: 9,
+      November: 10,
+      December: 11,
     };
     let parts = date.split(" ");
     let day = Number(parts[3]);
     let month = MonthDate[parts[2]];
     let year = parts[5];
-    let newDate = format(new Date(year, month, day), "yyyy-MM-dd");
+    let newDate = format(new Date(year, month - 1, day), "yyyy-MM-dd");
     console.log(newDate);
     return newDate;
   }
@@ -129,10 +129,11 @@ const NewAppointment = () => {
     const dates = [usersdate, newDate];
     //console.log("dates", dates);
 
-    if (dates[0] < dates[1]) {
+    if (dates[0] < dates[1] || dates[0] === dates[1]) {
       toast.error("Date is unavailable");
-      return;
+      return false;
     }
+    return true;
   }
   // const test = parseDate(
   //   "Thu Dec 04 2025 00:00:00 GMT+0200 (Eastern European Standard Time)"
@@ -154,14 +155,17 @@ const NewAppointment = () => {
       toast.error("Our terms and condition wasnt accepted!");
       return;
     }
-    handleFormatDate(selecteddate);
+    if (!handleFormatDate(selecteddate)) {
+      return;
+    }
     try {
       let response = await API.post("Appointment", {
         id: user._id,
         username: user.username,
         fullname: user.fullname,
         age: user.age,
-        doctor: selecteddoctor._id,
+        doctorid: selecteddoctor._id,
+        doctorname: selecteddoctor.fullname,
         date: selecteddate,
         time: time,
         message: message,

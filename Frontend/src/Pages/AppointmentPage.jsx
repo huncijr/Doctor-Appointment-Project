@@ -3,10 +3,10 @@ import { useDoctor } from "../Context/DoctorContext.jsx";
 import { use, useEffect } from "react";
 import { Button } from "flowbite-react";
 import AppointmentTable from "../Components/Table.jsx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const AppointmentPage = () => {
   const { selecteddoctor, setSelectedDoctor } = useDoctor();
-
+  const Navigate = useNavigate();
   const doctorsArray = Array.isArray(selecteddoctor)
     ? selecteddoctor
     : [selecteddoctor];
@@ -14,6 +14,11 @@ const AppointmentPage = () => {
   useEffect(() => {
     console.log(selecteddoctor);
   }, [selecteddoctor]);
+
+  const handleNavigate = (doctor) => {
+    setSelectedDoctor(doctor);
+    Navigate(`/AddAppointment/${doctor.fullname}`);
+  };
 
   return (
     <div className="relative flex flex-col justify-center z-10 w-full ">
@@ -103,11 +108,12 @@ const AppointmentPage = () => {
                   </div>
 
                   <div className="flex flex-col items-center mt-4 gap-3 px-4 pb-4">
-                    <Link to={`/AddAppointment/${doctor.fullname}`}>
-                      <Button className="rounded-full w-full bg-gradient-to-r from-secondary via-blue-secondary to-primary text-white hover:bg-gradient-to-br">
-                        Add an appointment
-                      </Button>
-                    </Link>
+                    <Button
+                      onClick={() => handleNavigate(doctor)}
+                      className="rounded-full w-full bg-gradient-to-r from-secondary via-blue-secondary to-primary text-white hover:bg-gradient-to-br"
+                    >
+                      Add an appointment
+                    </Button>
                     <Button color="light" pill className="w-full">
                       VIEW MY APPOINTMENTS
                     </Button>

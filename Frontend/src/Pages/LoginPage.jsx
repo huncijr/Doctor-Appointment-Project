@@ -12,7 +12,14 @@ import {
   Toast,
   ToastToggle,
 } from "flowbite-react";
-import { Eye, EyeClosed, CheckCheck, Trash2, ShieldAlert } from "lucide-react";
+import {
+  Eye,
+  EyeClosed,
+  CheckCheck,
+  Trash2,
+  ShieldAlert,
+  LogOut,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import axios from "axios";
@@ -162,7 +169,6 @@ const LoginPage = () => {
         localStorage.setItem("user", JSON.stringify(response.data));
       }
       setUser(response.data);
-      console.log(user);
     } catch (error) {
       if (error.response && error.response.status === 400) {
         toast.error("User name is already taken!");
@@ -226,6 +232,21 @@ const LoginPage = () => {
       setLoginPassword("");
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleLogOut = async () => {
+    try {
+      if (cookies) {
+        await API.post("SignOut", {});
+      } else {
+        localStorage.removeItem("user");
+      }
+      setUser(null);
+      setLoginUserName("");
+      setLoginPassword("");
+    } catch (error) {
+      console.error(error);
     }
   };
   useEffect(() => {
@@ -549,6 +570,15 @@ const LoginPage = () => {
                   >
                     <Trash2 />
                     Delete Account
+                  </Button>
+                </div>
+                <div className="flex justify-center items-center py-3">
+                  <Button
+                    size="md"
+                    className={switch1 ? "bg-primary" : "bg-secondary/30"}
+                    onClick={handleLogOut}
+                  >
+                    <LogOut className="mr-2" /> Sign Out
                   </Button>
                 </div>
               </div>
