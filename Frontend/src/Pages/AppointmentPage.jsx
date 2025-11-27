@@ -1,19 +1,16 @@
 import NavBar from "../Components/Navbar.jsx";
 import { useDoctor } from "../Context/DoctorContext.jsx";
-import { use, useEffect } from "react";
+import { use, useEffect, useState } from "react";
 import { Button } from "flowbite-react";
 import AppointmentTable from "../Components/Table.jsx";
 import { Link, useNavigate } from "react-router-dom";
+import { API } from "../Context/AppointmentAPI.js";
 const AppointmentPage = () => {
   const { selecteddoctor, setSelectedDoctor } = useDoctor();
   const Navigate = useNavigate();
   const doctorsArray = Array.isArray(selecteddoctor)
     ? selecteddoctor
     : [selecteddoctor];
-
-  useEffect(() => {
-    console.log(selecteddoctor);
-  }, [selecteddoctor]);
 
   const handleNavigate = (doctor) => {
     setSelectedDoctor(doctor);

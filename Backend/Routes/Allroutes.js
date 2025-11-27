@@ -9,6 +9,7 @@ import {
   Protect,
   MakeAnAppointment,
   GetAppointment,
+  GetDoctorAppointments,
   DeleteAppointment,
 } from "./Controllers.js";
 
@@ -21,6 +22,7 @@ AppRoutes.delete("/Delete/:id", DeleteUser);
 AppRoutes.post("/SignOut", SignOutUser);
 AppRoutes.post("/Appointment", MakeAnAppointment);
 AppRoutes.get("/GetAppointment", GetAppointment);
+AppRoutes.get("/GetAllappointment", GetDoctorAppointments);
 AppRoutes.delete("/DeleteAppointment", DeleteAppointment);
 AppRoutes.get("/checkAuth", Protect, (req, res) => {
   res.json({

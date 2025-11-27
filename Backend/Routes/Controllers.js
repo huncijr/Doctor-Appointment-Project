@@ -4,10 +4,17 @@ import bcrypt from "bcryptjs";
 import { Appointment, User, Doctor } from "../DataBase/Schemas.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import redis from "../DataBase/Redis.js";
 
 export const GetDoctors = async (req, res) => {
   try {
+    const cacheKey = "alldoctors";
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return res.json(JSON.parse(cached));
+    }
     const doctors = await Doctor.find();
+    await redis.set(cacheKey, JSON.stringify(doctors), "EX", 60);
     res.json(doctors);
   } catch (error) {
     res.status(500).json({ message: "error", error });
@@ -32,7 +39,6 @@ export const GetRegistration = async (req, res) => {
     const UserExists = await User.findOne({ username });
     if (UserExists) {
       return res.status(400).json({ message: "User already exists" });
-      console.log("User already has been created");
     }
     const user = await User.create({
       username,
@@ -141,6 +147,7 @@ export const MakeAnAppointment = async (req, res) => {
       date,
       time,
       message,
+      reason,
     } = req.body;
     let user = await User.findOne({ username });
     if (!user) return res.status(404).json({ Message: "User was not found" });
@@ -156,11 +163,9 @@ export const MakeAnAppointment = async (req, res) => {
       date,
       time,
       message,
+      reason,
     });
-    res.status(201).json({
-      date,
-      doctorid,
-    });
+    res.status(201).json();
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
@@ -189,10 +194,41 @@ export const GetAppointment = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+export const GetDoctorAppointments = async (req, res) => {
+  try {
+    let { doctorIds } = req.query;
+
+    if (!doctorIds)
+      return res.status(400).json({ message: "No doctor IDs provided" });
+
+    if (typeof doctorIds === "string") {
+      doctorIds = doctorIds.split(",");
+    }
+
+    if (!Array.isArray(doctorIds)) {
+      doctorIds = [doctorIds];
+    }
+
+    const appointments = await Appointment.find(
+      { doctorId: { $in: doctorIds } },
+      { date: 1, time: 1, reason: 1, _id: 0 }
+    );
+
+    if (!appointments.length) {
+      return res.status(404).json({ message: "appointment was NOT found" });
+    }
+
+    console.log(appointments);
+    return res.status(200).json({ appointments });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 export const DeleteAppointment = async (req, res) => {
   try {
     const { appointmentid } = req.body;
-    console.log("lefutottam");
     const appointment = await Appointment.findById(appointmentid);
     if (!appointment) {
       return res.status(404).json({ message: "Appointment wasnt found" });

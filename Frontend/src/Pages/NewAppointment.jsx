@@ -169,6 +169,7 @@ const NewAppointment = () => {
         date: selecteddate,
         time: time,
         message: message,
+        reason: "Reserved",
       });
       setAppointment(response.data);
       setSelectedDate(null);

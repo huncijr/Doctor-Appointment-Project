@@ -1,7 +1,31 @@
 import { StepBack, StepForward } from "lucide-react";
-import { useEffect } from "react";
-
+import { useEffect, useState } from "react";
+import { API } from "../Context/AppointmentAPI";
 const AppointmentTable = ({ doctor }) => {
+  const [appointments, setAppointments] = useState(null);
+  useEffect(() => {
+    const GetAppointment = async () => {
+      const ids = Array.isArray(doctor) ? doctor.map((d) => d._id) : doctor._id;
+      console.log(ids);
+      try {
+        const res = await API.get("GetAllappointment", {
+          params: {
+            doctorIds: ids.join(","),
+          },
+        });
+        console.log("lefuttam");
+        setAppointments(res.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    GetAppointment();
+  }, []);
+
+  useEffect(() => {
+    console.log(appointments);
+  }, [appointments]);
+
   function mergSchedules(doctors) {
     if (!doctors) return null;
     if (Array.isArray(doctors) && doctors.length > 1) {
