@@ -7,12 +7,21 @@ const AppointmentTable = ({ doctor }) => {
     const GetAppointment = async () => {
       const ids = Array.isArray(doctor) ? doctor.map((d) => d._id) : doctor._id;
       console.log(ids);
+      let res;
       try {
-        const res = await API.get("GetAllappointment", {
-          params: {
-            doctorIds: ids.join(","),
-          },
-        });
+        if (Array.isArray(doctor)) {
+          res = await API.get("GetAllappointment", {
+            params: {
+              doctorIds: ids.join(","),
+            },
+          });
+        } else {
+          res = await API.get("GetAllappointment", {
+            params: {
+              doctorIds: ids,
+            },
+          });
+        }
         console.log("lefuttam");
         setAppointments(res.data);
       } catch (error) {

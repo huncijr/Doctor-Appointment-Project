@@ -25,7 +25,7 @@ const AppointmentPage = () => {
           <div className=" flex justify-center py-10">
             <h1
               className="px-5  border-x-2 text-2xl md:text-3xl
-             text-secondary border-secondary"
+             text-secondary border-secondary hover-doubleline"
             >
               APPOINTMENT
             </h1>

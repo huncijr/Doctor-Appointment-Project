@@ -5,11 +5,13 @@ import { Appointment, User, Doctor } from "../DataBase/Schemas.js";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import redis from "../DataBase/Redis.js";
+import rateLimit from "../DataBase/Upstash.js";
 
 export const GetDoctors = async (req, res) => {
   try {
     const cacheKey = "alldoctors";
     const cached = await redis.get(cacheKey);
+    //console.log(cached);
     if (cached) {
       return res.json(JSON.parse(cached));
     }
@@ -109,6 +111,7 @@ export const DeleteUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     await User.findByIdAndDelete(userId);
+    await Appointment.findByIdAndDelete({ userId: userId });
     res.clearCookie("jwt", {
       httpOnly: true,
       sameSite: "strict",
@@ -134,6 +137,21 @@ export const SignOutUser = async (req, res) => {
     return res.status(500).json({ message: "Server error " });
   }
 };
+export const rateLimiterMiddleware = async (req, res, next) => {
+  const id = req.body;
+  try {
+    const result = await rateLimit.limit(id);
+    if (!result.success) {
+      return res.status(429).json({
+        message: "Too many requests!",
+      });
+    }
+    next();
+  } catch (err) {
+    console.error("Rate limit error:", err);
+    next();
+  }
+};
 
 export const MakeAnAppointment = async (req, res) => {
   try {
@@ -150,6 +168,13 @@ export const MakeAnAppointment = async (req, res) => {
       reason,
     } = req.body;
     let user = await User.findOne({ username });
+    let userappointments = await Appointment.countDocuments({ userid: id });
+    console.log(userappointments);
+    if (userappointments > 4) {
+      return res
+        .status(409)
+        .json({ message: "You cannot create more than 5 appointments" });
+    }
     if (!user) return res.status(404).json({ Message: "User was not found" });
     const selecteddoctor = await Doctor.findById(doctorid);
     if (!selecteddoctor)
@@ -172,20 +197,31 @@ export const MakeAnAppointment = async (req, res) => {
   }
 };
 export const GetAppointment = async (req, res) => {
-  const { userid } = req.query;
   try {
+    const { userid } = req.query;
+    // console.log(userid);
+    // const cacheKey = `Appointmentids:${userid}`;
+    // console.log(cacheKey);
+    // const cached = await redis.get(cacheKey);
+    // console.log(cached);
+    // if (cached) {
+    //   console.log("lefutottam");
+    //   return res.json(JSON.parse(cached));
+    // }
     const user = await User.findById(userid);
+
     if (!user) {
       return res.status(404).json({ message: "User was NOT found" });
     }
-
     const appointments = await Appointment.find({
       userid,
     });
-    console.log(appointments);
+
+    //console.log(appointments);
     if (!appointments || appointments.length === 0) {
       return res.status(404).json({ message: "Appointment was NOT found" });
     }
+    // await redis.set(cacheKey, JSON.stringify(appointments), "EX", 120);
     return res.status(200).json({
       appointments,
     });
@@ -197,35 +233,43 @@ export const GetAppointment = async (req, res) => {
 export const GetDoctorAppointments = async (req, res) => {
   try {
     let { doctorIds } = req.query;
-
-    if (!doctorIds)
-      return res.status(400).json({ message: "No doctor IDs provided" });
-
-    if (typeof doctorIds === "string") {
-      doctorIds = doctorIds.split(",");
+    const cacheKey = "Doctorids";
+    const cached = await redis.get(cacheKey);
+    //console.log(cached);
+    if (cached) {
+      return res.json(JSON.parse(cached));
+    }
+    let appointments;
+    if (doctorIds.includes(",")) {
+      let ids = doctorIds.split(",");
+      appointments = [];
+      for (let id of ids) {
+        let result = await Appointment.find(
+          { doctorid: id },
+          { date: 1, time: 1, reason: 1, _id: 0 }
+        );
+        appointments = [...appointments, ...result];
+      }
+      //console.log(appointments);
+    } else {
+      appointments = await Appointment.find(
+        { doctorid: { $in: doctorIds } },
+        { date: 1, time: 1, reason: 1, _id: 0 }
+      );
+      //console.log(appointments);
     }
 
-    if (!Array.isArray(doctorIds)) {
-      doctorIds = [doctorIds];
-    }
-
-    const appointments = await Appointment.find(
-      { doctorId: { $in: doctorIds } },
-      { date: 1, time: 1, reason: 1, _id: 0 }
-    );
-
-    if (!appointments.length) {
+    if (!appointments || appointments.length === 0) {
       return res.status(404).json({ message: "appointment was NOT found" });
     }
-
-    console.log(appointments);
-    return res.status(200).json({ appointments });
+    await redis.set(cacheKey, JSON.stringify(appointments), "EX", 120);
+    return res.status(200).json({
+      appointments,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Server error" });
   }
 };
-
 export const DeleteAppointment = async (req, res) => {
   try {
     const { appointmentid } = req.body;

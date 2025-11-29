@@ -9,17 +9,19 @@ import {
   Dropdown,
   DropdownItem,
   Spinner,
+  Toast,
+  ToastToggle,
 } from "flowbite-react";
 import { useDoctor } from "../Context/DoctorContext";
 import { useEffect, useState } from "react";
 import { compareAsc, format } from "date-fns";
 import { toast } from "react-hot-toast";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, ScrollRestoration } from "react-router-dom";
 import { useAuth } from "../Context/CheckAuth.jsx";
 import { useCookie } from "../Context/Cookies.jsx";
 import Datepicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { CircleAlert, ThumbsUp } from "lucide-react";
+import { CircleAlert, ThumbsUp, ShieldOff, RefreshCwOff } from "lucide-react";
 import { API } from "../Context/AppointmentAPI.js";
 const NewAppointment = () => {
   const [age, SetAge] = useState(null);
@@ -30,8 +32,37 @@ const NewAppointment = () => {
   const [terms, setTerms] = useState(false);
   const [isopen, setOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [showratelimiterToast, setShowRateLimiterToast] = useState(false);
+  const [isdisable, setisDisable] = useState(false);
   const navigate = useNavigate();
-
+  const maxLengthToast = (
+    <div className="top-0 fixed left-0  gap-4 animate-slide-left">
+      {" "}
+      <Toast>
+        <div className=" inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-500 dark:bg-orange-700 dark:text-orange-200">
+          <ShieldOff className="h-5 w-5" />
+        </div>
+        <div className="ml-3 text-sm font-normal">
+          You can't make more than 5 appointments!
+        </div>
+        <ToastToggle />
+      </Toast>
+    </div>
+  );
+  const rateLimiterToast = (
+    <div className="top-0 fixed right-0 gap-4 animate-slide-right">
+      <Toast>
+        <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-secondary ">
+          <RefreshCwOff />
+        </div>
+        <div className="ml-3 text-sm font-normal">
+          Limit reached, please wait!
+        </div>
+        <ToastToggle />
+      </Toast>
+    </div>
+  );
   const { selecteddoctor, setSelectedDoctor } = useDoctor();
   const { user, setUser } = useAuth();
   const { cookies } = useCookie();
@@ -54,7 +85,8 @@ const NewAppointment = () => {
     if (submitted) {
       document.body.style.overflow = "hidden";
       let timer = setTimeout(() => {
-        navigate("/home");
+        <ScrollRestoration />;
+        navigate("/Home");
       }, 1500);
       return () => clearTimeout(time);
     }
@@ -177,6 +209,24 @@ const NewAppointment = () => {
       setTerms(false);
       setSubmitted(true);
     } catch (error) {
+      if (error && error.response.status === 409) {
+        console.log("lefutottam");
+        setShowToast(true);
+        setTimeout(() => {
+          setShowToast(false);
+        }, 2000);
+      }
+      if (error && error.response.status === 429) {
+        console.log("lefutottam");
+        setisDisable(true);
+        setShowRateLimiterToast(true);
+        setTimeout(() => {
+          setisDisable(false);
+        }, 20000);
+        setTimeout(() => {
+          setShowRateLimiterToast(false);
+        }, 5000);
+      }
       console.error(error);
     }
   }
@@ -188,7 +238,7 @@ const NewAppointment = () => {
     <div className="relative flex flex-col items-center z-10">
       <NavBar />
       <div className=" p-10">
-        <h1 className="text-2xl md:text-3xl border-x-2 font-bold px-5 text-secondary">
+        <h1 className="text-2xl md:text-3xl border-x-2 font-bold px-5 text-secondary text-center">
           Make a new appointment
         </h1>
       </div>
@@ -293,7 +343,11 @@ const NewAppointment = () => {
               </div>
               <div className="flex justify-end ">
                 {user ? (
-                  <Button className=" bg-secondary" type="submit">
+                  <Button
+                    className=" bg-secondary"
+                    type="submit"
+                    disabled={isdisable}
+                  >
                     Submit
                   </Button>
                 ) : (
@@ -375,6 +429,8 @@ const NewAppointment = () => {
           </div>
         </div>
       )}
+      <div>{showToast && maxLengthToast}</div>
+      <div>{showratelimiterToast && rateLimiterToast}</div>
     </div>
   );
 };
