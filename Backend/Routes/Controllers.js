@@ -7,6 +7,18 @@ import jwt from "jsonwebtoken";
 import redis from "../DataBase/Redis.js";
 import rateLimit from "../DataBase/Upstash.js";
 
+export const Protect = async (req, res, next) => {
+  const token = req.cookies.jwt;
+  if (!token) return res.status(200).json({ loggedIn: false });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    req.user = await User.findById(decoded.id).select("-password");
+    next();
+  } catch (error) {
+    res.status(401).json({ message: "Not authorized" });
+  }
+};
+
 export const GetDoctors = async (req, res) => {
   try {
     const cacheKey = "alldoctors";
@@ -170,7 +182,7 @@ export const MakeAnAppointment = async (req, res) => {
     let user = await User.findOne({ username });
     let userappointments = await Appointment.countDocuments({ userid: id });
     console.log(userappointments);
-    if (userappointments > 4) {
+    if (userappointments > 10) {
       return res
         .status(409)
         .json({ message: "You cannot create more than 5 appointments" });
@@ -262,7 +274,7 @@ export const GetDoctorAppointments = async (req, res) => {
     if (!appointments || appointments.length === 0) {
       return res.status(404).json({ message: "appointment was NOT found" });
     }
-    await redis.set(cacheKey, JSON.stringify(appointments), "EX", 120);
+    await redis.set(cacheKey, JSON.stringify(appointments), "EX", 20);
     return res.status(200).json({
       appointments,
     });
@@ -285,15 +297,28 @@ export const DeleteAppointment = async (req, res) => {
     console.error(error);
   }
 };
-
-export const Protect = async (req, res, next) => {
-  const token = req.cookies.jwt;
-  if (!token) return res.status(200).json({ loggedIn: false });
+export const GetTimes = async (req, res) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.user = await User.findById(decoded.id).select("-password");
-    next();
+    const { doctorid, date } = req.query;
+    console.log(doctorid, date);
+    let results;
+    const selectedDate = new Date(date);
+    const findappointments = await Appointment.find({
+      doctorid: doctorid,
+      date: selectedDate,
+    });
+    if (findappointments) {
+      results = findappointments.map((a) => ({
+        time: a.time,
+        reason: a.reason,
+      }));
+    } else {
+      res.status(404).json({ message: "No appointments found" });
+    }
+    console.log(results);
+    res.status(200).json(results);
   } catch (error) {
-    res.status(401).json({ message: "Not authorized" });
+    console.error(error);
+    res.status(500).json({ message: "Server error!" });
   }
 };

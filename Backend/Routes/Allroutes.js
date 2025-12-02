@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  Protect,
   GetDoctors,
   GetDoctorsById,
   GetRegistration,
@@ -11,7 +12,7 @@ import {
   GetAppointment,
   GetDoctorAppointments,
   DeleteAppointment,
-  Protect,
+  GetTimes,
 } from "./Controllers.js";
 
 const AppRoutes = express.Router();
@@ -25,6 +26,8 @@ AppRoutes.post("/Appointment", rateLimiterMiddleware, MakeAnAppointment);
 AppRoutes.get("/GetAppointment", GetAppointment);
 AppRoutes.get("/GetAllappointment", GetDoctorAppointments);
 AppRoutes.delete("/DeleteAppointment", DeleteAppointment);
+AppRoutes.get("/GetTimes", GetTimes);
+
 AppRoutes.get("/checkAuth", Protect, (req, res) => {
   res.json({
     loggedIn: true,

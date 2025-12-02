@@ -21,12 +21,21 @@ import { useAuth } from "../Context/CheckAuth.jsx";
 import { useCookie } from "../Context/Cookies.jsx";
 import Datepicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { CircleAlert, ThumbsUp, ShieldOff, RefreshCwOff } from "lucide-react";
+import {
+  CircleAlert,
+  ThumbsUp,
+  ShieldOff,
+  RefreshCwOff,
+  ShieldX,
+} from "lucide-react";
 import { API } from "../Context/AppointmentAPI.js";
 const NewAppointment = () => {
   const [age, SetAge] = useState(null);
   const [selecteddate, setSelectedDate] = useState(null);
   const [appointment, setAppointment] = useState([]);
+  const [findappointments, setFindAppointments] = useState(null);
+  const [merged, setMerged] = useState([]);
+  const [availabledate, setAvailableDate] = useState(false);
   const [message, setMessage] = useState("");
   const [time, setTime] = useState(null);
   const [terms, setTerms] = useState(false);
@@ -36,6 +45,9 @@ const NewAppointment = () => {
   const [showratelimiterToast, setShowRateLimiterToast] = useState(false);
   const [isdisable, setisDisable] = useState(false);
   const navigate = useNavigate();
+
+  let mergedTimes = null;
+
   const maxLengthToast = (
     <div className="top-0 fixed left-0  gap-4 animate-slide-left">
       {" "}
@@ -78,7 +90,6 @@ const NewAppointment = () => {
     } else {
       document.body.style = "auto";
     }
-    console.log(isopen);
   }, [isopen]);
 
   useEffect(() => {
@@ -91,6 +102,41 @@ const NewAppointment = () => {
       return () => clearTimeout(time);
     }
   }, [submitted]);
+
+  useEffect(() => {
+    if (selecteddate) {
+      const FetchTimes = async () => {
+        try {
+          let result = await API.get("/GetTimes", {
+            params: {
+              doctorid: selecteddoctor._id,
+              date: selecteddate,
+            },
+          });
+          setFindAppointments(result.data);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      FetchTimes();
+    }
+  }, [selecteddate]);
+  useEffect(() => {
+    console.log(findappointments);
+    console.log(Object.values(selecteddoctor.schedule)[0]);
+    mergedTimes = handleTime(
+      Object.values(selecteddoctor.schedule)[0],
+      findappointments
+    );
+    let weekday = handleWeekday(selecteddate);
+    if (weekday) {
+      setMerged(mergedTimes);
+      setAvailableDate(false);
+    } else {
+      setMerged([]);
+      setAvailableDate(true);
+    }
+  }, [findappointments]);
 
   function parseDate(date) {
     if (!date) return;
@@ -171,6 +217,39 @@ const NewAppointment = () => {
   //   "Thu Dec 04 2025 00:00:00 GMT+0200 (Eastern European Standard Time)"
   // );
   //console.log(handleFormatDate(test));
+  function handleTime(doctordates, appointmentdates) {
+    if (!Array.isArray(appointmentdates)) {
+      console.log("lefutottam");
+      return doctordates.map((slot) => ({
+        time: slot.time,
+        reason: slot.reason || "",
+      }));
+    }
+    const mergeddates = doctordates.map((dates) => {
+      const merged = appointmentdates.find(
+        (appointment) => dates.time === appointment.time
+      );
+      return {
+        time: dates.time,
+        reason: merged ? merged.reason : dates.reason,
+      };
+    });
+    return mergeddates;
+  }
+  function handleWeekday(date) {
+    let weekday = new Date(date).toLocaleString("en-US", {
+      weekday: "long",
+    });
+    console.log(weekday);
+    switch (weekday) {
+      case "Saturday":
+        return false;
+      case "Sunday":
+        return false;
+      default:
+        return true;
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -210,14 +289,12 @@ const NewAppointment = () => {
       setSubmitted(true);
     } catch (error) {
       if (error && error.response.status === 409) {
-        console.log("lefutottam");
         setShowToast(true);
         setTimeout(() => {
           setShowToast(false);
         }, 2000);
       }
       if (error && error.response.status === 429) {
-        console.log("lefutottam");
         setisDisable(true);
         setShowRateLimiterToast(true);
         setTimeout(() => {
@@ -231,8 +308,8 @@ const NewAppointment = () => {
     }
   }
   useEffect(() => {
-    console.log(selecteddoctor);
-  }, [selecteddoctor]);
+    console.log(merged);
+  }, [merged]);
 
   return (
     <div className="relative flex flex-col items-center z-10">
@@ -276,13 +353,26 @@ const NewAppointment = () => {
                 {" "}
                 Your date:
               </Label>
-              <FloatingLabel
-                variant="filled"
-                label="Date"
-                color="success"
-                disabled
-                value={parseDate(selecteddate)}
-              />
+              <div className="grid grid-cols-7">
+                <div className={availabledate ? "col-span-6" : "col-span-7"}>
+                  <FloatingLabel
+                    variant="filled"
+                    label="Date"
+                    color="success"
+                    disabled
+                    value={parseDate(selecteddate)}
+                  />
+                </div>
+                {availabledate && (
+                  <div className=" flex flex-col justify-center  items-center p-2  ">
+                    <ShieldOff className="text-orange-700 sm:h-[4vh] sm:w-[5vw] border-2 rounded-full border-black bg-black " />
+                    <p className="text-[10%] lg:text-lg text-secondary/70 text-center">
+                      the date is not available
+                    </p>
+                  </div>
+                )}
+              </div>
+
               <div className="py-10 ">
                 <Label className=" text-lg text-white font-bold ">
                   {" "}
@@ -294,28 +384,33 @@ const NewAppointment = () => {
                     size="lg"
                     className="text-xl font-bold border-secondary  border-2"
                   >
-                    {Object.values(selecteddoctor.schedule)[0]?.map(
-                      (slot, index) => (
-                        <div key={index}>
+                    {merged &&
+                      merged.map((slot, index) => (
+                        <div key={index} className="flex justify-start px-1">
                           <DropdownItem
                             onClick={() => setTime(slot.time)}
-                            disabled={!slot.reason}
+                            disabled={slot.reason}
+                            className="bungee-inline text-sm "
                           >
                             {slot.reason ? (
-                              <span>{slot.time} - Available</span>
+                              <span>
+                                {" "}
+                                {slot.time} -{" "}
+                                <span className="text-red-600">
+                                  Unavailable
+                                </span>
+                              </span>
                             ) : (
                               <span>
-                                {slot.time} -
-                                <span className="text-red-600">
-                                  {" "}
-                                  Unavailable{" "}
+                                {slot.time} -{" "}
+                                <span className="text-green-700">
+                                  Available
                                 </span>
                               </span>
                             )}
                           </DropdownItem>
                         </div>
-                      )
-                    )}
+                      ))}
                   </Dropdown>
                 </div>
               </div>

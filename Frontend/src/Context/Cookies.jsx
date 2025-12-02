@@ -17,7 +17,7 @@ export const CookieProvider = ({ children }) => {
     setCookies(false);
   };
   useEffect(() => {
-    console.log(cookies);
+    //console.log(cookies);
   }, [cookies]);
   return (
     <CookieContext.Provider

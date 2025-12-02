@@ -54,7 +54,7 @@ const AllAppointmentPage = () => {
     }
   }, [user]);
   useEffect(() => {
-    console.log(appointments);
+    // console.log(appointments);
   }, [appointments]);
 
   const SplitDate = (date) => {

@@ -1,84 +1,95 @@
 import { StepBack, StepForward } from "lucide-react";
 import { useEffect, useState } from "react";
 import { API } from "../Context/AppointmentAPI";
+
 const AppointmentTable = ({ doctor }) => {
   const [appointments, setAppointments] = useState(null);
+
   useEffect(() => {
     const GetAppointment = async () => {
-      const ids = Array.isArray(doctor) ? doctor.map((d) => d._id) : doctor._id;
-      console.log(ids);
-      let res;
       try {
-        if (Array.isArray(doctor)) {
-          res = await API.get("GetAllappointment", {
-            params: {
-              doctorIds: ids.join(","),
-            },
-          });
-        } else {
-          res = await API.get("GetAllappointment", {
-            params: {
-              doctorIds: ids,
-            },
-          });
-        }
-        console.log("lefuttam");
+        const ids = Array.isArray(doctor)
+          ? doctor.map((d) => d._id).join(",")
+          : doctor._id;
+
+        const res = await API.get("GetAllappointment", {
+          params: { doctorIds: ids },
+        });
+
         setAppointments(res.data);
       } catch (error) {
         console.error(error);
       }
     };
+
     GetAppointment();
   }, []);
-
   useEffect(() => {
-    console.log(appointments);
+    //console.log(appointments);
+    //console.log(doctor.schedule);
   }, [appointments]);
 
-  function mergSchedules(doctors) {
+  function mergeSchedules(doctors, appointments = []) {
     if (!doctors) return null;
-    if (Array.isArray(doctors) && doctors.length > 1) {
-      const combined = {};
-      doctors.forEach((doc) => {
-        Object.entries(doc.schedule).forEach(([day, slots]) => {
-          if (!combined[day]) combined[day] = [];
-          slots.forEach((slot) => {
-            if (!combined[day].some((s) => s.time === slot.time)) {
-              combined[day].push({ time: slot.time, reason: slot.reason });
-            }
-          });
+    //console.log(doctor.schedule);
+    console.log(appointments);
+
+    const docs = Array.isArray(doctors) ? doctors : [doctors];
+    let merged = {};
+
+    docs.forEach((doc) => {
+      if (!doc.schedule) return;
+
+      Object.entries(doc.schedule).forEach(([day, slots]) => {
+        if (!merged[day]) merged[day] = [];
+
+        slots.forEach((slot) => {
+          if (!merged[day].some((s) => s.time === slot.time)) {
+            merged[day].push({
+              time: slot.time,
+              reason: slot.reason || "",
+            });
+          }
         });
       });
-      return combined;
-    }
-    if (!Array.isArray(doctors)) {
-      const days = Object.keys(doctors.schedule);
-      const hours = doctors.schedule[days[0]].map((slot) => slot.time);
-      const reason = hours.map((_, i) =>
-        days.map((day) => doctor.schedule[day][i]?.reason || "")
-      );
+    });
 
-      return { days, hours, reason };
+    if (Array.isArray(appointments)) {
+      appointments.forEach((appt) => {
+        if (!appt || !appt.date) return;
+
+        const day = new Date(appt.date).toLocaleDateString("en-US", {
+          weekday: "long",
+        });
+        console.log(day);
+        if (!merged[day]) merged[day] = [];
+
+        const index = merged[day].findIndex((s) => s.time === appt.time);
+        if (index !== -1) {
+          merged[day][index].reason = appt.reason || "Reserved";
+          console.log(merged[day][index].reason);
+        } else {
+          merged[day].push({
+            time: appt.time,
+            reason: appt.reason || "Reserved",
+          });
+        }
+      });
     }
-    return null;
-  }
-  function getDayslots(day) {
-    if (Array.isArray(schedulesData)) {
-      const found = schedulesData.find((D) => Array.isArray(D) && D[0] == day);
-      return found ? found[1] : [];
-    }
-    return schedulesData[day] || schedulesData.reason || [];
+    //console.log(merged);
+    return merged;
   }
 
-  const schedulesData = mergSchedules(doctor);
+  function getDaySlots(day, schedulesData) {
+    if (!schedulesData) return [];
+    return schedulesData[day] || [];
+  }
+
+  const schedulesData = mergeSchedules(doctor, appointments);
   if (!schedulesData) return null;
-  //console.log(schedulesData);
-  const days = Array.isArray(doctor)
-    ? Object.keys(schedulesData)
-    : schedulesData.days;
-  const hours = Array.isArray(doctor)
-    ? Object.entries(schedulesData)[0][1].map((slot) => slot.time)
-    : schedulesData.hours;
+
+  const days = Object.keys(schedulesData);
+  const hours = schedulesData[days[0]].map((s) => s.time);
 
   function handleReasons(reason) {
     switch (reason) {
@@ -98,6 +109,7 @@ const AppointmentTable = ({ doctor }) => {
         return {};
     }
   }
+
   function handleClickBack() {}
   function handleClickForward() {}
 
@@ -108,7 +120,7 @@ const AppointmentTable = ({ doctor }) => {
           <StepBack />
         </button>
         <h1 className="py-10 text-xl font-bold">THIS WEEK</h1>
-        <button onClick={handleClickForward} className="px-10">
+        <button className="px-10" onClick={handleClickForward}>
           <StepForward />
         </button>
       </div>
@@ -118,10 +130,7 @@ const AppointmentTable = ({ doctor }) => {
           <tr>
             <th className="border bg-white border-gray-400 px-2 py-1"></th>
             {days.map((day, i) => (
-              <th
-                key={i}
-                className="border-x-2 border-gray-400 bg-white px-2 py-1"
-              >
+              <th key={i} className="border bg-white border-gray-400 px-2 py-1">
                 {day}
               </th>
             ))}
@@ -136,10 +145,9 @@ const AppointmentTable = ({ doctor }) => {
               </td>
 
               {days.map((day, j) => {
-                const Shuffleslots = getDayslots(day);
-                const slot = Array.isArray(Shuffleslots[i])
-                  ? { reason: Shuffleslots[i][j] || "" }
-                  : Shuffleslots[i] || [];
+                const slots = getDaySlots(day, schedulesData);
+                const slot = slots[i] || { reason: "" };
+
                 return (
                   <td
                     key={j}
@@ -148,7 +156,7 @@ const AppointmentTable = ({ doctor }) => {
                     }`}
                     style={handleReasons(slot.reason)}
                   >
-                    {slot.reason ? slot.reason : ""}
+                    {slot.reason || ""}
                   </td>
                 );
               })}
