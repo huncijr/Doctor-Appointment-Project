@@ -57,10 +57,6 @@ const AllAppointmentPage = () => {
     // console.log(appointments);
   }, [appointments]);
 
-  const SplitDate = (date) => {
-    let newdate = date.slice(0, date.indexOf("T"));
-    return newdate;
-  };
   const SplitMessage = (message, length) => {
     const newlength =
       message.length > length ? message.slice(0, length) + "..." : message;
@@ -132,7 +128,7 @@ const AllAppointmentPage = () => {
                             <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                               {appointment.doctorname}
                             </TableCell>
-                            <TableCell>{SplitDate(appointment.date)}</TableCell>
+                            <TableCell>{appointment.date}</TableCell>
                             <TableCell>{appointment.time}</TableCell>
                             <TableCell>
                               {SplitMessage(appointment.message, 120)}

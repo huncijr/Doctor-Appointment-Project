@@ -181,7 +181,6 @@ export const MakeAnAppointment = async (req, res) => {
     } = req.body;
     let user = await User.findOne({ username });
     let userappointments = await Appointment.countDocuments({ userid: id });
-    console.log(userappointments);
     if (userappointments > 10) {
       return res
         .status(409)
@@ -217,7 +216,6 @@ export const GetAppointment = async (req, res) => {
     // const cached = await redis.get(cacheKey);
     // console.log(cached);
     // if (cached) {
-    //   console.log("lefutottam");
     //   return res.json(JSON.parse(cached));
     // }
     const user = await User.findById(userid);
@@ -300,7 +298,6 @@ export const DeleteAppointment = async (req, res) => {
 export const GetTimes = async (req, res) => {
   try {
     const { doctorid, date } = req.query;
-    console.log(doctorid, date);
     let results;
     const selectedDate = new Date(date);
     const findappointments = await Appointment.find({

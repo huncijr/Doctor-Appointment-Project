@@ -122,8 +122,6 @@ const NewAppointment = () => {
     }
   }, [selecteddate]);
   useEffect(() => {
-    console.log(findappointments);
-    console.log(Object.values(selecteddoctor.schedule)[0]);
     mergedTimes = handleTime(
       Object.values(selecteddoctor.schedule)[0],
       findappointments
@@ -192,7 +190,6 @@ const NewAppointment = () => {
     let month = MonthDate[parts[2]];
     let year = parts[5];
     let newDate = format(new Date(year, month - 1, day), "yyyy-MM-dd");
-    console.log(newDate);
     return newDate;
   }
   function handleFormatDate(date) {
@@ -201,11 +198,11 @@ const NewAppointment = () => {
     let todaysDate = new Date();
     let year = todaysDate.getFullYear();
     let month = todaysDate.getMonth();
-    let day = todaysDate.getDate();
+    let day = String(todaysDate.getDate()).padStart(2, "0");
     const newDate = `${year}-${month}-${day}`;
 
     const dates = [usersdate, newDate];
-    //console.log("dates", dates);
+    console.log("dates", dates);
 
     if (dates[0] < dates[1] || dates[0] === dates[1]) {
       toast.error("Date is unavailable");
@@ -219,7 +216,6 @@ const NewAppointment = () => {
   //console.log(handleFormatDate(test));
   function handleTime(doctordates, appointmentdates) {
     if (!Array.isArray(appointmentdates)) {
-      console.log("lefutottam");
       return doctordates.map((slot) => ({
         time: slot.time,
         reason: slot.reason || "",
@@ -269,6 +265,13 @@ const NewAppointment = () => {
     if (!handleFormatDate(selecteddate)) {
       return;
     }
+    let sendDate = parseDate(selecteddate);
+    let formatdate = formatDate(sendDate);
+    let [year, month, day] = formatdate.split("-");
+    month = String(Number(month) + 1).padStart(2, "0");
+    day = String(day).padStart(2, "0");
+    let newDate = `${year}-${month}-${day}`;
+    console.log(newDate);
     try {
       let response = await API.post("Appointment", {
         id: user._id,
@@ -277,7 +280,7 @@ const NewAppointment = () => {
         age: user.age,
         doctorid: selecteddoctor._id,
         doctorname: selecteddoctor.fullname,
-        date: selecteddate,
+        date: newDate,
         time: time,
         message: message,
         reason: "Reserved",
@@ -310,6 +313,9 @@ const NewAppointment = () => {
   useEffect(() => {
     console.log(merged);
   }, [merged]);
+  useEffect(() => {
+    console.log(selecteddate);
+  }, [selecteddate]);
 
   return (
     <div className="relative flex flex-col items-center z-10">
