@@ -53,6 +53,16 @@
     transform: translateY(0);
   }
 }
+@keyframes fadeInLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 @keyframes fadeInBottom {
   0% {
     opacity: 0;
@@ -212,6 +222,10 @@
   }
   .animate-fadeInRight {
     animation: fadeInRight 1.4s ease-in forwards;
+  }
+  .animate-fadeInLeft {
+    animation: fadeInLeft 1.2s ease-in-out forwards;
+    transform-origin: center;
   }
   .animate-fadeInBottom {
     animation: fadeInBottom 1.8s ease-out forwards;

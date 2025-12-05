@@ -4,12 +4,22 @@ import { API } from "../Context/AppointmentAPI";
 
 const AppointmentTable = ({ doctor }) => {
   const [appointments, setAppointments] = useState(null);
+  const [fadeinright, setFadeInRight] = useState(true);
+  const [fadeinleft, setFadeInLeft] = useState(true);
+  const [disabled, setDisabled] = useState(false);
+  const [merged, setMerged] = useState({});
+  const [days, setDays] = useState([]);
+  const [hours, setHours] = useState([]);
   const [weekdays, setWeekdays] = useState(() => {
     let date = formatDate(new Date());
     return date;
   });
-  const [appearweekdays, setAppearWeekDays] = useState(null);
-
+  const [appearweekdays, setAppearWeekDays] = useState(() => {
+    let firstweek = getWeekDays(weekdays);
+    return firstweek;
+  });
+  const [weekappointments, setWeekAppointments] = useState([]);
+  let schedulesData;
   useEffect(() => {
     const GetAppointment = async () => {
       try {
@@ -30,18 +40,74 @@ const AppointmentTable = ({ doctor }) => {
     GetAppointment();
   }, []);
   useEffect(() => {
+    schedulesData = mergeSchedules(doctor, appointments);
+    console.log(schedulesData);
+    setMerged(schedulesData);
+    console.log(merged);
+    const dayKeys = Object.keys(schedulesData);
+    setDays(dayKeys);
+
+    if (dayKeys.length) {
+      const hour = schedulesData[dayKeys[0]].map((s) => s.time);
+      setHours(hour);
+    }
+  }, [appointments]);
+
+  useEffect(() => {
+    console.log(`ora :${hours} napok: ${days}`);
+  }, [hours, days]);
+
+  useEffect(() => {
+    if (!merged || !appearweekdays || !appointments) return;
+    const updatedWeekAppointments = appearweekdays.map((day) => {
+      const weekdayName = day.toLocaleDateString("en-US", { weekday: "long" });
+      const baseSlots = merged[weekdayName] || [];
+      let dayISO = day.toISOString().split("T")[0];
+      let bookedAppointments = appointments.filter(
+        (appt) => appt.date === dayISO
+      );
+      const finalSlots = baseSlots.map((slot) => {
+        const booked = bookedAppointments?.find((a) => a.time === slot.time);
+        return {
+          ...slot,
+          reason: booked?.reason || slot.reason,
+          date: booked?.date || slot.date,
+        };
+      });
+      bookedAppointments?.forEach((appt) => {
+        if (!finalSlots.some((s) => s.time === appt.time)) {
+          finalSlots.push({
+            time: appt.time,
+            reason: appt.reason,
+            date: appt.date,
+          });
+        }
+      });
+      return {
+        date: dayISO,
+        day: weekdayName,
+        slots: finalSlots,
+      };
+    });
+    setWeekAppointments(updatedWeekAppointments);
+  }, [weekdays, appearweekdays, merged]);
+
+  useEffect(() => {
     if (weekdays) {
       let appearweek = getWeekDays(weekdays);
       setAppearWeekDays(appearweek);
     }
   }, [weekdays]);
 
+  useEffect(() => {
+    console.log(weekappointments);
+  }, [weekappointments]);
+
   function mergeSchedules(doctors, appointments = []) {
     if (!doctors) return null;
-    console.log(appointments);
+    let merged = {};
 
     const docs = Array.isArray(doctors) ? doctors : [doctors];
-    let merged = {};
 
     docs.forEach((doc) => {
       if (!doc.schedule) return;
@@ -54,6 +120,7 @@ const AppointmentTable = ({ doctor }) => {
             merged[day].push({
               time: slot.time,
               reason: slot.reason || "",
+              date: slot.date || null,
             });
           }
         });
@@ -63,7 +130,6 @@ const AppointmentTable = ({ doctor }) => {
     if (Array.isArray(appointments)) {
       appointments.forEach((appt) => {
         if (!appt || !appt.date) return;
-
         const day = new Date(appt.date).toLocaleDateString("en-US", {
           weekday: "long",
         });
@@ -73,15 +139,17 @@ const AppointmentTable = ({ doctor }) => {
         const index = merged[day].findIndex((s) => s.time === appt.time);
         if (index !== -1) {
           merged[day][index].reason = appt.reason || "Reserved";
+          merged[day][index].date = appt.date;
         } else {
           merged[day].push({
             time: appt.time,
             reason: appt.reason || "Reserved",
+            date: appt.date,
           });
         }
       });
     }
-    //console.log(merged);
+    console.log(merged);
     return merged;
   }
 
@@ -89,7 +157,6 @@ const AppointmentTable = ({ doctor }) => {
     if (!schedulesData) return [];
     return schedulesData[day] || [];
   }
-
   function getWeekDays(date = new Date()) {
     const current = new Date(date);
     let dayOfWeek = current.getDay();
@@ -113,12 +180,6 @@ const AppointmentTable = ({ doctor }) => {
     return newdate;
   }
 
-  const schedulesData = mergeSchedules(doctor, appointments);
-  if (!schedulesData) return null;
-
-  const days = Object.keys(schedulesData);
-  const hours = schedulesData[days[0]].map((s) => s.time);
-
   function handleReasons(reason) {
     switch (reason) {
       case "Lunch Break":
@@ -137,8 +198,16 @@ const AppointmentTable = ({ doctor }) => {
         return {};
     }
   }
+  function handleDisabled() {
+    setDisabled(true);
+    setTimeout(() => {
+      setDisabled(false);
+    }, 1000);
+  }
   function handleClickForward(e, date) {
     e.preventDefault();
+    setFadeInRight(true);
+    setTimeout(() => setFadeInRight(null), 50);
     const nextweek = new Date(date);
     nextweek.setDate(nextweek.getDate() + 7);
     const handlenextweek = getWeekDays(nextweek);
@@ -149,9 +218,10 @@ const AppointmentTable = ({ doctor }) => {
 
   function handleClickBack(e, date) {
     e.preventDefault();
+    setFadeInLeft(true);
+    setTimeout(() => setFadeInLeft(null), 50);
     const lastweek = new Date(date);
     lastweek.setDate(lastweek.getDate() - 7);
-
     const handlelastweek = getWeekDays(lastweek);
     let formatlastweek = formatDate(lastweek);
     console.log(`${handlelastweek} es ${formatlastweek}`);
@@ -160,8 +230,12 @@ const AppointmentTable = ({ doctor }) => {
   }
 
   return (
-    <div className="overflow-x-auto bg-white">
-      <div className="relative top-0 left-0 p-2">
+    <div
+      className={`overflow-x-auto bg-white ${
+        fadeinright ? "animate-fadeInRight" : ""
+      }${fadeinleft ? "animate-fadeInLeft" : ""}`}
+    >
+      <div className="relative top-0 left-0 p-2 ">
         <span className="italic changa-one tracking-wider sm:text-lg md:text-xl lg:text-2xl">
           {appearweekdays &&
             `${appearweekdays[0].toLocaleDateString("en-US", {
@@ -177,14 +251,25 @@ const AppointmentTable = ({ doctor }) => {
             )}`}
         </span>
       </div>
-      <div className="flex justify-between text-center items-center">
-        <button className="px-10" onClick={(e) => handleClickBack(e, weekdays)}>
+      <div className="flex justify-between text-center items-center ">
+        <button
+          className="px-10"
+          onClick={(e) => {
+            handleClickBack(e, weekdays);
+            handleDisabled();
+          }}
+          disabled={disabled}
+        >
           <StepBack />
         </button>
         <h1 className="py-10 text-xl font-bold">THIS WEEK</h1>
         <button
           className="px-10"
-          onClick={(e) => handleClickForward(e, weekdays)}
+          onClick={(e) => {
+            handleClickForward(e, weekdays);
+            handleDisabled();
+          }}
+          disabled={disabled}
         >
           <StepForward />
         </button>
@@ -194,39 +279,64 @@ const AppointmentTable = ({ doctor }) => {
         <thead>
           <tr>
             <th className="border bg-white border-gray-400 px-2 py-1"></th>
-            {days.map((day, i) => (
-              <th key={i} className="border bg-white border-gray-400 px-2 py-1">
-                {day}
-              </th>
-            ))}
+            {days &&
+              days.map((day, i) => (
+                <th
+                  key={i}
+                  className="border bg-white border-gray-400 px-2 py-1"
+                >
+                  {day}
+                </th>
+              ))}
           </tr>
         </thead>
 
         <tbody>
-          {hours.map((hour, i) => (
-            <tr key={i}>
-              <td className="border bg-white border-gray-400 px-2 py-1 font-medium">
-                {hour}
-              </td>
+          {hours &&
+            hours.map((hour, i) => (
+              <tr key={i}>
+                <td className="border bg-white border-gray-400 px-2 py-1 font-medium">
+                  {hour}
+                </td>
 
-              {days.map((day, j) => {
-                const slots = getDaySlots(day, schedulesData);
-                const slot = slots[i] || { reason: "" };
+                {weekappointments
+                  ? weekappointments.map((day, j) => {
+                      const slots = getDaySlots(day);
+                      const slot = slots[i] || { reason: "" };
+                      console.log("lefutottam");
 
-                return (
-                  <td
-                    key={j}
-                    className={`border-2 border-black px-2 py-1 text-white ${
-                      slot.reason ? "bg-blue-800" : "bg-green-200"
-                    }`}
-                    style={handleReasons(slot.reason)}
-                  >
-                    {slot.reason || ""}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+                      return (
+                        <td
+                          key={j}
+                          className={`border-2 border-black px-2 py-1 text-white ${
+                            slot.reason ? "bg-blue-800" : "bg-green-200"
+                          }`}
+                          style={handleReasons(slot.reason)}
+                        >
+                          {slot.reason || ""}
+                        </td>
+                      );
+                    })
+                  : merged &&
+                    merged.map((day, j) => {
+                      const slots = getDaySlots(day, schedulesData);
+                      const slot = slots[i] || { reason: "" };
+                      console.log("lefutottam");
+
+                      return (
+                        <td
+                          key={j}
+                          className={`border-2 border-black px-2 py-1 text-white ${
+                            slot.reason ? "bg-blue-800" : "bg-green-200"
+                          }`}
+                          style={handleReasons(slot.reason)}
+                        >
+                          {slot.reason || ""}
+                        </td>
+                      );
+                    })}
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>
