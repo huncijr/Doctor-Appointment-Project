@@ -105,12 +105,18 @@ const NewAppointment = () => {
 
   useEffect(() => {
     if (selecteddate) {
+      let sendDate = parseDate(selecteddate);
+      let formatdate = formatDate(sendDate);
+      let [year, month, day] = formatdate.split("-");
+      month = String(Number(month) + 1).padStart(2, "0");
+      day = String(day).padStart(2, "0");
+      let newDate = `${year}-${month}-${day}`;
       const FetchTimes = async () => {
         try {
           let result = await API.get("/GetTimes", {
             params: {
               doctorid: selecteddoctor._id,
-              date: selecteddate,
+              date: newDate,
             },
           });
           setFindAppointments(result.data);

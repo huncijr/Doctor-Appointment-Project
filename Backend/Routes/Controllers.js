@@ -299,10 +299,10 @@ export const GetTimes = async (req, res) => {
   try {
     const { doctorid, date } = req.query;
     let results;
-    const selectedDate = new Date(date);
+    // console.log(doctorid, date);
     const findappointments = await Appointment.find({
       doctorid: doctorid,
-      date: selectedDate,
+      date: date,
     });
     if (findappointments) {
       results = findappointments.map((a) => ({
@@ -312,7 +312,7 @@ export const GetTimes = async (req, res) => {
     } else {
       res.status(404).json({ message: "No appointments found" });
     }
-    console.log(results);
+    // console.log(results);
     res.status(200).json(results);
   } catch (error) {
     console.error(error);

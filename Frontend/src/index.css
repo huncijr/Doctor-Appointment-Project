@@ -309,3 +309,25 @@
 .hover-doubleline:hover::before {
   width: 100%;
 }
+.table-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+.table-wrapper.past-week::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 130%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(128, 128, 128, 0.4),
+    rgba(128, 128, 128, 0.4) 2px,
+    transparent 2px,
+    transparent 10px
+  );
+  background-color: rgba(95, 93, 93, 0.7);
+  pointer-events: none;
+  z-index: 10;
+}

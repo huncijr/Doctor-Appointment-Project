@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { API } from "../Context/AppointmentAPI";
 
 const AppointmentTable = ({ doctor }) => {
+  if (!doctor) return null;
   const [appointments, setAppointments] = useState(null);
   const [fadeinright, setFadeInRight] = useState(true);
   const [fadeinleft, setFadeInLeft] = useState(true);
@@ -10,15 +11,27 @@ const AppointmentTable = ({ doctor }) => {
   const [merged, setMerged] = useState({});
   const [days, setDays] = useState([]);
   const [hours, setHours] = useState([]);
+
   const [weekdays, setWeekdays] = useState(() => {
     let date = formatDate(new Date());
     return date;
   });
+
+  const [oldweeks, setOldweeks] = useState(() => {
+    let today = new Date();
+    const date = new Date(today);
+    date.setDate(date.getDate() - 7);
+    let newdate = formatDate(date);
+    console.log(newdate);
+    return newdate;
+  });
+
   const [appearweekdays, setAppearWeekDays] = useState(() => {
     let firstweek = getWeekDays(weekdays);
     return firstweek;
   });
   const [weekappointments, setWeekAppointments] = useState([]);
+
   let schedulesData;
   useEffect(() => {
     const GetAppointment = async () => {
@@ -39,11 +52,10 @@ const AppointmentTable = ({ doctor }) => {
 
     GetAppointment();
   }, []);
-  useEffect(() => {
+  const generateMergedSchedules = (doctor, appointments = []) => {
     schedulesData = mergeSchedules(doctor, appointments);
-    console.log(schedulesData);
+    if (!schedulesData || Object.keys(schedulesData).length === 0) return;
     setMerged(schedulesData);
-    console.log(merged);
     const dayKeys = Object.keys(schedulesData);
     setDays(dayKeys);
 
@@ -51,46 +63,89 @@ const AppointmentTable = ({ doctor }) => {
       const hour = schedulesData[dayKeys[0]].map((s) => s.time);
       setHours(hour);
     }
-  }, [appointments]);
+    return schedulesData;
+  };
 
-  useEffect(() => {
-    console.log(`ora :${hours} napok: ${days}`);
-  }, [hours, days]);
+  const generateWeekAppointments = (
+    mergedData,
+    weekdays,
+    newappointments = []
+  ) => {
+    try {
+      if (!mergedData || !weekdays) return;
+      const updatedWeekAppointments = weekdays.map((day) => {
+        const weekdayName = day.toLocaleDateString("en-US", {
+          weekday: "long",
+        });
+        const dayISO = day.toISOString().slice(0, 10);
 
-  useEffect(() => {
-    if (!merged || !appearweekdays || !appointments) return;
-    const updatedWeekAppointments = appearweekdays.map((day) => {
-      const weekdayName = day.toLocaleDateString("en-US", { weekday: "long" });
-      const baseSlots = merged[weekdayName] || [];
-      let dayISO = day.toISOString().split("T")[0];
-      let bookedAppointments = appointments.filter(
-        (appt) => appt.date === dayISO
-      );
-      const finalSlots = baseSlots.map((slot) => {
-        const booked = bookedAppointments?.find((a) => a.time === slot.time);
+        const baseSlots = mergedData[weekdayName] || [];
+        const bookedAppointments = (newappointments || []).filter((appt) => {
+          const apptISO =
+            typeof appt.date === "string"
+              ? appt.date.slice(0, 10)
+              : new Date(appt.date).toISOString().slice(0, 10);
+          return apptISO === dayISO;
+        });
+
+        const finalSlots = baseSlots.map((slot) => {
+          const booked = (bookedAppointments || []).find(
+            (a) => a.time === slot.time
+          );
+
+          if (booked) {
+            const bookedISO =
+              typeof booked.date === "string"
+                ? booked.date.slice(0, 10)
+                : new Date(booked.date).toISOString().slice(0, 10);
+
+            return {
+              ...slot,
+              reason: booked.reason || "Reserved",
+              date: bookedISO,
+            };
+          }
+          if (slot.date) {
+            const slotISO =
+              typeof slot.date === "string"
+                ? slot.date.slice(0, 10)
+                : new Date(slot.date).toISOString().slice(0, 10);
+
+            if (slotISO !== dayISO) {
+              return {
+                ...slot,
+                reason: "",
+                date: null,
+              };
+            }
+          }
+
+          return {
+            ...slot,
+            reason: slot.reason || "",
+            date: slot.date || null,
+          };
+        });
+
         return {
-          ...slot,
-          reason: booked?.reason || slot.reason,
-          date: booked?.date || slot.date,
+          date: dayISO,
+          day: weekdayName,
+          slots: finalSlots,
         };
       });
-      bookedAppointments?.forEach((appt) => {
-        if (!finalSlots.some((s) => s.time === appt.time)) {
-          finalSlots.push({
-            time: appt.time,
-            reason: appt.reason,
-            date: appt.date,
-          });
-        }
-      });
-      return {
-        date: dayISO,
-        day: weekdayName,
-        slots: finalSlots,
-      };
-    });
-    setWeekAppointments(updatedWeekAppointments);
-  }, [weekdays, appearweekdays, merged]);
+
+      // console.log("setting weekAppointments", updatedWeekAppointments);
+      setWeekAppointments(updatedWeekAppointments);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    const mergedData = generateMergedSchedules(doctor, appointments);
+    if (mergedData) {
+      generateWeekAppointments(mergedData, appearweekdays, appointments);
+    }
+  }, [appointments, appearweekdays]);
 
   useEffect(() => {
     if (weekdays) {
@@ -99,13 +154,10 @@ const AppointmentTable = ({ doctor }) => {
     }
   }, [weekdays]);
 
-  useEffect(() => {
-    console.log(weekappointments);
-  }, [weekappointments]);
-
   function mergeSchedules(doctors, appointments = []) {
     if (!doctors) return null;
-    let merged = {};
+    let insidemerged = {};
+    // console.log(appointments);
 
     const docs = Array.isArray(doctors) ? doctors : [doctors];
 
@@ -113,11 +165,11 @@ const AppointmentTable = ({ doctor }) => {
       if (!doc.schedule) return;
 
       Object.entries(doc.schedule).forEach(([day, slots]) => {
-        if (!merged[day]) merged[day] = [];
+        if (!insidemerged[day]) insidemerged[day] = [];
 
         slots.forEach((slot) => {
-          if (!merged[day].some((s) => s.time === slot.time)) {
-            merged[day].push({
+          if (!insidemerged[day].some((s) => s.time === slot.time)) {
+            insidemerged[day].push({
               time: slot.time,
               reason: slot.reason || "",
               date: slot.date || null,
@@ -134,14 +186,14 @@ const AppointmentTable = ({ doctor }) => {
           weekday: "long",
         });
         // console.log(day);
-        if (!merged[day]) merged[day] = [];
+        if (!insidemerged[day]) insidemerged[day] = [];
 
-        const index = merged[day].findIndex((s) => s.time === appt.time);
+        const index = insidemerged[day].findIndex((s) => s.time === appt.time);
         if (index !== -1) {
-          merged[day][index].reason = appt.reason || "Reserved";
-          merged[day][index].date = appt.date;
+          insidemerged[day][index].reason = appt.reason || "Reserved";
+          insidemerged[day][index].date = appt.date;
         } else {
-          merged[day].push({
+          insidemerged[day].push({
             time: appt.time,
             reason: appt.reason || "Reserved",
             date: appt.date,
@@ -149,14 +201,10 @@ const AppointmentTable = ({ doctor }) => {
         }
       });
     }
-    console.log(merged);
-    return merged;
+    //console.log(insidemerged);
+    return insidemerged;
   }
 
-  function getDaySlots(day, schedulesData) {
-    if (!schedulesData) return [];
-    return schedulesData[day] || [];
-  }
   function getWeekDays(date = new Date()) {
     const current = new Date(date);
     let dayOfWeek = current.getDay();
@@ -172,6 +220,7 @@ const AppointmentTable = ({ doctor }) => {
     //console.log(days);
     return days;
   }
+
   function formatDate(date) {
     let year = date.getFullYear();
     let month = String(date.getMonth() + 1).padStart(2, "0");
@@ -198,12 +247,14 @@ const AppointmentTable = ({ doctor }) => {
         return {};
     }
   }
+
   function handleDisabled() {
     setDisabled(true);
     setTimeout(() => {
       setDisabled(false);
     }, 1000);
   }
+
   function handleClickForward(e, date) {
     e.preventDefault();
     setFadeInRight(true);
@@ -224,10 +275,16 @@ const AppointmentTable = ({ doctor }) => {
     lastweek.setDate(lastweek.getDate() - 7);
     const handlelastweek = getWeekDays(lastweek);
     let formatlastweek = formatDate(lastweek);
-    console.log(`${handlelastweek} es ${formatlastweek}`);
     setWeekdays(formatlastweek);
     setAppearWeekDays(handlelastweek);
   }
+  useEffect(() => {
+    if (weekdays >= oldweeks) {
+      console.log(oldweeks, "kisebb mint", weekdays);
+    } else {
+      console.log(oldweeks, "nagyobb mint", weekdays);
+    }
+  }, [weekdays, oldweeks]);
 
   return (
     <div
@@ -274,54 +331,38 @@ const AppointmentTable = ({ doctor }) => {
           <StepForward />
         </button>
       </div>
+      <div
+        className={`table-wrapper relative ${
+          weekdays >= oldweeks ? "" : "past-week"
+        }`}
+      >
+        <table className="border-collapse border border-gray-400 w-full text-center ">
+          <thead>
+            <tr>
+              <th className="border bg-white border-gray-400 px-2 py-1"></th>
+              {days &&
+                days.map((day, i) => (
+                  <th
+                    key={i}
+                    className="border bg-white border-gray-400 px-2 py-1"
+                  >
+                    {day}
+                  </th>
+                ))}
+            </tr>
+          </thead>
 
-      <table className="border-collapse border border-gray-400 w-full text-center">
-        <thead>
-          <tr>
-            <th className="border bg-white border-gray-400 px-2 py-1"></th>
-            {days &&
-              days.map((day, i) => (
-                <th
-                  key={i}
-                  className="border bg-white border-gray-400 px-2 py-1"
-                >
-                  {day}
-                </th>
-              ))}
-          </tr>
-        </thead>
+          <tbody>
+            {hours &&
+              hours.map((hour, i) => (
+                <tr key={i}>
+                  <td className="border bg-white border-gray-400 px-2 py-1 font-medium">
+                    {hour}
+                  </td>
 
-        <tbody>
-          {hours &&
-            hours.map((hour, i) => (
-              <tr key={i}>
-                <td className="border bg-white border-gray-400 px-2 py-1 font-medium">
-                  {hour}
-                </td>
-
-                {weekappointments
-                  ? weekappointments.map((day, j) => {
-                      const slots = getDaySlots(day);
-                      const slot = slots[i] || { reason: "" };
-                      console.log("lefutottam");
-
-                      return (
-                        <td
-                          key={j}
-                          className={`border-2 border-black px-2 py-1 text-white ${
-                            slot.reason ? "bg-blue-800" : "bg-green-200"
-                          }`}
-                          style={handleReasons(slot.reason)}
-                        >
-                          {slot.reason || ""}
-                        </td>
-                      );
-                    })
-                  : merged &&
-                    merged.map((day, j) => {
-                      const slots = getDaySlots(day, schedulesData);
-                      const slot = slots[i] || { reason: "" };
-                      console.log("lefutottam");
+                  {weekappointments &&
+                    weekappointments.map((day, j) => {
+                      const slot = day.slots[i] || { reason: "" };
 
                       return (
                         <td
@@ -335,10 +376,11 @@ const AppointmentTable = ({ doctor }) => {
                         </td>
                       );
                     })}
-              </tr>
-            ))}
-        </tbody>
-      </table>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
