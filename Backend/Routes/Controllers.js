@@ -181,7 +181,7 @@ export const MakeAnAppointment = async (req, res) => {
     } = req.body;
     let user = await User.findOne({ username });
     let userappointments = await Appointment.countDocuments({ userid: id });
-    if (userappointments > 10) {
+    if (userappointments > 5) {
       return res
         .status(409)
         .json({ message: "You cannot create more than 5 appointments" });
@@ -250,6 +250,9 @@ export const GetDoctorAppointments = async (req, res) => {
       return res.json(JSON.parse(cached));
     }
     let appointments;
+    if (!doctorIds) {
+      return res.json({ message: "No ids found" });
+    }
     if (doctorIds.includes(",")) {
       let ids = doctorIds.split(",");
       appointments = [];

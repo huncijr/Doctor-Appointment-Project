@@ -4,22 +4,30 @@ import NotFoundPage from "./Pages/NotFoundPage.jsx";
 import NewAppointment from "./Pages/NewAppointment.jsx";
 import LoginPage from "./Pages/LoginPage.jsx";
 import AllAppointmentPage from "./Pages/AllAppointmentPage.jsx";
-import { Route, Routes, useMatch } from "react-router-dom";
+import AboutMePage from "./Pages/AboutMePage.jsx";
+import { Route, Routes, useMatch, useLocation } from "react-router-dom";
 import AppointmentPage from "./Pages/AppointmentPage.jsx";
 import { DoctorProvider } from "./Context/DoctorContext.jsx";
 import { Toaster } from "react-hot-toast";
 import Meteors from "./Components/GenerateMeteors";
+import Stars from "./Components/Stars.jsx";
 
 function App() {
-  const isHome = useMatch("/Home");
-  const isAppointment = useMatch("/Appointment/:id");
-  const isnewAppointment = useMatch("/AddAppointment/:id");
-  const isAccount = useMatch("/Account");
-  const AllAppointments = useMatch("/MyAppointments");
-  const showBackground =
-    isHome || isAppointment || isnewAppointment || isAccount || AllAppointments;
-  const showMeteors =
-    isHome || isAppointment || isnewAppointment || isAccount || AllAppointments;
+  const location = useLocation();
+  const path = location.pathname;
+  const AllRoutes = [
+    "/Home",
+    "/Appointment",
+    "/AddAppointment",
+    "/Account",
+    "/MyAppointments",
+    "/AboutMe",
+  ];
+  const StarRoute = ["/AboutMe"];
+
+  const showBackground = AllRoutes.some((r) => path.startsWith(r));
+  const showMeteors = AllRoutes.some((r) => path.startsWith(r));
+  const showStars = StarRoute.some((r) => path.startsWith(r));
   return (
     <DoctorProvider>
       <Toaster />
@@ -30,10 +38,12 @@ function App() {
       >
         {showBackground && <Background />}
         {showMeteors && <Meteors />}
+        {showStars && <Stars />}
         <Routes>
           <Route path="/Home" element={<HomePage />} />
           <Route path="/Appointment/:id" element={<AppointmentPage />} />
           <Route path="/AddAppointment/:id" element={<NewAppointment />} />
+          <Route path="/AboutMe" element={<AboutMePage />} />
           <Route path="/MyAppointments" element={<AllAppointmentPage />} />
           <Route path="/Account" element={<LoginPage />} />
           <Route path="/*" element={<NotFoundPage />} />

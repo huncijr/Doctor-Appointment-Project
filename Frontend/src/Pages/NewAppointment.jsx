@@ -115,7 +115,7 @@ const NewAppointment = () => {
         try {
           let result = await API.get("/GetTimes", {
             params: {
-              doctorid: selecteddoctor._id,
+              doctorid: selecteddoctor._id || "",
               date: newDate,
             },
           });

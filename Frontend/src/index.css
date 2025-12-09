@@ -210,6 +210,20 @@
     box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
   }
 }
+@keyframes twinkle {
+  0% {
+    opacity: 0.2;
+    filter: blur(1px);
+  }
+  50% {
+    opacity: 1;
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 0.2;
+    filter: blur(1px);
+  }
+}
 
 @layer utilities {
   .animate-fadeInScale {
@@ -266,6 +280,7 @@
     animation: none;
   }
 }
+
 .react-datepicker {
   font-size: 0.9rem !important;
   background-color: rgb(167, 156, 214) !important;
@@ -330,4 +345,22 @@
   background-color: rgba(95, 93, 93, 0.7);
   pointer-events: none;
   z-index: 10;
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: twinkle 3s infinite ease-in-out;
 }

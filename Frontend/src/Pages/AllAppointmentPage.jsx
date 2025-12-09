@@ -109,9 +109,9 @@ const AllAppointmentPage = () => {
                     My Appointments
                   </h1>
                 </div>
-                <div className="w-full max-w-[90%] overflow-x-auto">
-                  <div className="inline-block sm:min-w-[0%]">
-                    <Table striped className=" ">
+                <div className="w-full max-w-[90%] overflow-x-auto ">
+                  <div className="block sm:min-w-[0%]">
+                    <Table striped>
                       <TableHead>
                         <TableHeadCell>Doctor</TableHeadCell>
                         <TableHeadCell>Date</TableHeadCell>

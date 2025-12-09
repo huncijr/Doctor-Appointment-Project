@@ -41,7 +41,7 @@ const AppointmentTable = ({ doctor }) => {
           : doctor._id;
 
         const res = await API.get("GetAllappointment", {
-          params: { doctorIds: ids },
+          params: { doctorIds: ids || "" },
         });
 
         setAppointments(res.data);
