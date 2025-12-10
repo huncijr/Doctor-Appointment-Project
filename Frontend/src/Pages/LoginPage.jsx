@@ -168,7 +168,9 @@ const LoginPage = () => {
       if (!cookies) {
         localStorage.setItem("user", JSON.stringify(response.data));
       }
-      setUser(response.data);
+      if (response.success) {
+        setUser(response.data);
+      }
     } catch (error) {
       if (error.response && error.response.status === 400) {
         toast.error("User name is already taken!");

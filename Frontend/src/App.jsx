@@ -7,6 +7,7 @@ import AllAppointmentPage from "./Pages/AllAppointmentPage.jsx";
 import AboutMePage from "./Pages/AboutMePage.jsx";
 import { Route, Routes, useMatch, useLocation } from "react-router-dom";
 import AppointmentPage from "./Pages/AppointmentPage.jsx";
+import Footer from "./Components/Footer.jsx";
 import { DoctorProvider } from "./Context/DoctorContext.jsx";
 import { Toaster } from "react-hot-toast";
 import Meteors from "./Components/GenerateMeteors";
@@ -39,15 +40,18 @@ function App() {
         {showBackground && <Background />}
         {showMeteors && <Meteors />}
         {showStars && <Stars />}
-        <Routes>
-          <Route path="/Home" element={<HomePage />} />
-          <Route path="/Appointment/:id" element={<AppointmentPage />} />
-          <Route path="/AddAppointment/:id" element={<NewAppointment />} />
-          <Route path="/AboutMe" element={<AboutMePage />} />
-          <Route path="/MyAppointments" element={<AllAppointmentPage />} />
-          <Route path="/Account" element={<LoginPage />} />
-          <Route path="/*" element={<NotFoundPage />} />
-        </Routes>
+        <main className="flex-1">
+          <Routes>
+            <Route path="/Home" element={<HomePage />} />
+            <Route path="/Appointment/:id" element={<AppointmentPage />} />
+            <Route path="/AddAppointment/:id" element={<NewAppointment />} />
+            <Route path="/AboutMe" element={<AboutMePage />} />
+            <Route path="/MyAppointments" element={<AllAppointmentPage />} />
+            <Route path="/Account" element={<LoginPage />} />
+            <Route path="/*" element={<NotFoundPage />} />
+          </Routes>
+        </main>
+        <Footer />
       </div>
     </DoctorProvider>
   );
