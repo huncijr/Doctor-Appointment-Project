@@ -5,6 +5,7 @@ import {
   GetDoctorsById,
   GetRegistration,
   GetLogin,
+  verifyDoctorCode,
   DeleteUser,
   SignOutUser,
   rateLimiterMiddleware,
@@ -13,6 +14,7 @@ import {
   GetDoctorAppointments,
   DeleteAppointment,
   GetTimes,
+  createDoctor,
 } from "./Controllers.js";
 
 const AppRoutes = express.Router();
@@ -20,6 +22,7 @@ AppRoutes.get("/AllDoctor", GetDoctors);
 AppRoutes.get("/Doctor", GetDoctorsById);
 AppRoutes.post("/Signup", GetRegistration);
 AppRoutes.post("/Login", GetLogin);
+AppRoutes.post("/Doctor-verify", verifyDoctorCode);
 AppRoutes.delete("/Delete/:id", DeleteUser);
 AppRoutes.post("/SignOut", SignOutUser);
 AppRoutes.post("/Appointment", rateLimiterMiddleware, MakeAnAppointment);
@@ -27,6 +30,8 @@ AppRoutes.get("/GetAppointment", GetAppointment);
 AppRoutes.get("/GetAllappointment", GetDoctorAppointments);
 AppRoutes.delete("/DeleteAppointment", DeleteAppointment);
 AppRoutes.get("/GetTimes", GetTimes);
+
+AppRoutes.post("/doctor/register", createDoctor);
 
 AppRoutes.get("/checkAuth", Protect, (req, res) => {
   res.json({

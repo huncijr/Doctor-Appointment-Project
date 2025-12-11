@@ -36,6 +36,9 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
   const [gender, setGender] = useState("");
+  const [isdoctor, setIsDoctor] = useState(false);
+  const [temptdoctorid, setTemptDoctorId] = useState(null);
+  const [doctorCode, setDoctorCode] = useState("");
 
   const [loginusername, setLoginUserName] = useState("");
   const [loginpassword, setLoginPassword] = useState("");
@@ -159,6 +162,7 @@ const LoginPage = () => {
           password: validPassword,
           gender: gender,
           registered: true,
+          role: "user",
           cookies,
         },
         {
@@ -168,9 +172,7 @@ const LoginPage = () => {
       if (!cookies) {
         localStorage.setItem("user", JSON.stringify(response.data));
       }
-      if (response.success) {
-        setUser(response.data);
-      }
+      setUser(response.data);
     } catch (error) {
       if (error.response && error.response.status === 400) {
         toast.error("User name is already taken!");
@@ -201,13 +203,46 @@ const LoginPage = () => {
           withCredentials: true,
         }
       );
-
-      if (!cookies) {
-        localStorage.setItem("user", JSON.stringify(response.data));
+      console.log(response);
+      if (temptdoctorid && isdoctor) {
+        try {
+          console.log("lefutottam");
+          const verify = await API.post(
+            "/Doctor-verify",
+            {
+              userid: temptdoctorid,
+              doctorCode,
+            },
+            { withCredentials: true }
+          );
+          if (verify.data) {
+            if (!cookies) {
+              localStorage.setItem("user", JSON.stringify(verify.data));
+              setUser(verify.data);
+              setIsDoctor(false);
+              setTemptDoctorId(null);
+              setDoctorCode("");
+              toast.success(`Welcome back ${verify.data.fullname}`);
+            }
+          }
+        } catch (error) {
+          toast.error("Something is wrong!");
+          console.error(error);
+        }
+        return;
+      } else if (response && response.data.requiresDoctorCode) {
+        console.log("lefutottam");
+        setIsDoctor(true);
+        setTemptDoctorId(response.data.userId);
+        return;
+      } else {
+        console.log("lefutottam");
+        if (!cookies) {
+          localStorage.setItem("user", JSON.stringify(response.data));
+        }
+        setUser(response.data);
+        toast.success(`Welcome back ${response.data.fullname}`);
       }
-      setUser(response.data);
-      console.log(user);
-      toast.success(`Welcome ${response.data.fullname}`);
     } catch (error) {
       if (error.response && error.response.status === 401) {
         toast.error("Fullname or password is incorrect");
@@ -216,11 +251,10 @@ const LoginPage = () => {
       }
     }
   };
+
   const handleDelete = async () => {
     try {
-      let userdelete = await API.delete(`/delete/${user._id}`, {
-        withCredentials: true,
-      });
+      let userdelete = await API.delete(`/delete/${user._id}`, {});
       localStorage.removeItem("user");
       declineCookies();
       setUser(null);
@@ -468,6 +502,20 @@ const LoginPage = () => {
                         </div>
                       </div>
                     </div>
+                    {isdoctor && (
+                      <div className="py-3 mb-2 block">
+                        <span className="text-primary font-bold">Code</span>
+                        <div className="flex items-center gap-2">
+                          <TextInput
+                            type="text"
+                            required
+                            shadow
+                            value={doctorCode}
+                            onChange={(e) => setDoctorCode(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
                     <div className="flex justify-end">
                       <Button
                         type="submit"

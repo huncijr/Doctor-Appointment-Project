@@ -27,6 +27,7 @@ import {
   ShieldOff,
   RefreshCwOff,
   ShieldX,
+  CircleX,
 } from "lucide-react";
 import { API } from "../Context/AppointmentAPI.js";
 const NewAppointment = () => {
@@ -44,6 +45,7 @@ const NewAppointment = () => {
   const [showToast, setShowToast] = useState(false);
   const [showratelimiterToast, setShowRateLimiterToast] = useState(false);
   const [isdisable, setisDisable] = useState(false);
+  const [openterms, setOpenTerms] = useState(false);
   const navigate = useNavigate();
 
   let mergedTimes = null;
@@ -91,6 +93,13 @@ const NewAppointment = () => {
       document.body.style = "auto";
     }
   }, [isopen]);
+  useEffect(() => {
+    if (openterms) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style = "auto";
+    }
+  }, [openterms]);
 
   useEffect(() => {
     if (submitted) {
@@ -443,7 +452,10 @@ const NewAppointment = () => {
                 <Checkbox onClick={() => setTerms(!terms)} />
                 <Label className="flex">
                   I agree with the&nbsp;
-                  <span className="text-cyan-600 hover:underline dark:text-cyan-500">
+                  <span
+                    className="text-cyan-600 hover:underline dark:text-cyan-500 cursor-pointer"
+                    onClick={() => setOpenTerms(true)}
+                  >
                     terms and conditions
                   </span>
                 </Label>{" "}
@@ -538,6 +550,61 @@ const NewAppointment = () => {
       )}
       <div>{showToast && maxLengthToast}</div>
       <div>{showratelimiterToast && rateLimiterToast}</div>
+      <div>
+        {openterms && (
+          <div className="fixed inset-0 z-10 bg-black/50 flex justify-center items-center">
+            <div className="flex flex-col items-end justify-end relative bg-gray-300 w-[90%] max-h-[80%] overflow-y-auto p-1 rounded-lg shadow-lg">
+              <div className="p-1">
+                <button
+                  className="rounded-full p-2 hover:bg-red-700 hover:text-white"
+                  onClick={() => setOpenTerms(false)}
+                >
+                  <CircleX />
+                </button>
+              </div>
+              <Textarea
+                rows={30}
+                className="bg-primary text-black"
+                value="Terms and Conditions 
+
+1. Introduction
+Welcome to this platform! These terms are provided purely as an example and do not create any legal obligations. By using the platform, you acknowledge that this is for demonstration purposes only.
+
+2. Use of the Service
+Using the service is entirely optional. No real user data is collected, and we do not take responsibility for any handling of actual data.
+
+3. Account Creation
+While account creation is technically possible, any information provided here is not processed in reality and is not connected to any real service.
+
+4. Privacy
+All information entered is solely for demonstration purposes. No data is analyzed, or shared with third parties.
+
+5. Content
+All content on this platform is entirely fictional, including text, images, and other elements. Nothing represents reality and is not intended as advice.
+
+6. Disclaimer of Liability
+Use of this service is entirely at the user’s own risk. We accept no responsibility for any harm arising from using these example texts.
+
+7. Restrictions
+Elements on the platform cannot be used for real business or legal purposes.
+Texts and content serve demonstration purposes only.
+All references and functions are fictional and do not trigger any real processes.
+
+8.Changes to Terms
+We reserve the right to modify these terms at any time without notice. Any changes automatically take effect, but since this is an example, they are illustrative only.
+
+9. Contact
+No real contact forms or channels are handled.
+
+10. Other Provisions
+This document exists solely for educational and demonstration purposes.
+It does not create any real legal or financial obligations.
+Users acknowledge that all information here is strictly an example."
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

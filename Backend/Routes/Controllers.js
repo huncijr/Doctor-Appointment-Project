@@ -48,8 +48,16 @@ export const GetDoctorsById = async (req, res) => {
 
 export const GetRegistration = async (req, res) => {
   try {
-    const { fullname, age, username, password, gender, registered, cookies } =
-      req.body;
+    const {
+      fullname,
+      age,
+      username,
+      password,
+      gender,
+      registered,
+      role,
+      cookies,
+    } = req.body;
     const UserExists = await User.findOne({ username });
     if (UserExists) {
       return res.status(400).json({ message: "User already exists" });
@@ -61,6 +69,7 @@ export const GetRegistration = async (req, res) => {
       gender,
       age,
       registered,
+      role,
     });
     const token = generateToken(user._id);
     if (cookies) {
@@ -94,6 +103,11 @@ export const GetLogin = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid fullname or password" });
     }
+    if (user.role === "doctor") {
+      return res
+        .status(200)
+        .json({ requiresDoctorCode: true, userId: user._id });
+    }
     const token = generateToken(user._id);
     if (cookies) {
       res.cookie("jwt", token, {
@@ -115,6 +129,31 @@ export const GetLogin = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+export const verifyDoctorCode = async (req, res) => {
+  const { userid, doctorCode } = req.body;
+  try {
+    const user = await User.findById(userid);
+    if (!user || user.role !== "doctor")
+      return res.status(401).json({ message: "Unathorized" });
+    const isMatch = await bcrypt.compare(doctorCode, user.doctorCode);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const token = generateToken(user._id);
+    res.status(200).json({
+      _id: user._id,
+      username: user.username,
+      age: user.age,
+      fullname: user.fullname,
+      gender: user.gender,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 export const DeleteUser = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -123,7 +162,7 @@ export const DeleteUser = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     await User.findByIdAndDelete(userId);
-    await Appointment.findByIdAndDelete({ userId: userId });
+    await Appointment.deleteMany({ userid: user._id });
     res.clearCookie("jwt", {
       httpOnly: true,
       sameSite: "strict",
@@ -320,5 +359,43 @@ export const GetTimes = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error!" });
+  }
+};
+
+export const createDoctor = async (req, res) => {
+  try {
+    const {
+      fullname,
+      username,
+      password,
+      gender,
+      age,
+      registered,
+      doctorCode,
+      role,
+    } = req.body;
+    if (!fullname || !username || !password || !doctorCode) {
+      return res.status(404).json({ message: "Missing" });
+    }
+    const exists = await User.findOne({ username });
+    if (exists) {
+      return res.status(400).json({ message: "username already exists" });
+    }
+    const hashedDoctorCode = await bcrypt.hash(String(doctorCode), 10);
+
+    const user = await User.create({
+      username,
+      fullname,
+      password,
+      gender,
+      age,
+      registered,
+      doctorCode: hashedDoctorCode,
+      role: "doctor",
+    });
+    return res.status(201).json({ message: "created" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Server error" });
   }
 };

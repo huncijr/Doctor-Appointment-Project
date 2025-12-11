@@ -5,7 +5,6 @@ import { Button } from "flowbite-react";
 import AppointmentTable from "../Components/Table.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import { API } from "../Context/AppointmentAPI.js";
-import React from "react";
 const AppointmentPage = () => {
   const { selecteddoctor, setSelectedDoctor } = useDoctor();
   const Navigate = useNavigate();
@@ -17,30 +16,6 @@ const AppointmentPage = () => {
     setSelectedDoctor(doctor);
     Navigate(`/AddAppointment/${doctor.fullname}`);
   };
-  class ErrorBoundary extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = { hasError: false, error: null };
-    }
-
-    static getDerivedStateFromError(error) {
-      return { hasError: true, error };
-    }
-
-    componentDidCatch(error, errorInfo) {
-      console.error("Caught by ErrorBoundary:", error, errorInfo);
-    }
-
-    render() {
-      if (this.state.hasError) {
-        return (
-          <div>Hiba történt a komponensben: {this.state.error?.message}</div>
-        );
-      }
-
-      return this.props.children;
-    }
-  }
 
   return (
     <div className="relative flex flex-col justify-center z-10 w-full ">
@@ -89,8 +64,10 @@ const AppointmentPage = () => {
               </div>
             </div>
 
-            <div className="flex-2  sm:w-2/3 self-start sm:self-auto overflow-x-auto">
-              <AppointmentTable doctor={selecteddoctor} />
+            <div className="flex-2 sm:w-2/3 self-start sm:self-auto overflow-x-auto overflow-y-auto w-full max-w-full  ">
+              <div className="min-w-[90%] w-max">
+                <AppointmentTable doctor={selecteddoctor} />
+              </div>
             </div>
           </div>
         </div>
@@ -143,10 +120,10 @@ const AppointmentPage = () => {
                 </div>
               ))}
             </div>
-            <div className="flex-2  sm:w-2/3 self-start sm:self-auto overflow-x-auto w-full max-w-full">
-              <ErrorBoundary>
+            <div className="flex-2  sm:w-2/3 self-start sm:self-auto overflow-x-auto overflow-y-auto w-full max-w-full min-w-0">
+              <div className="min-w-[30%]">
                 <AppointmentTable doctor={selecteddoctor} />
-              </ErrorBoundary>
+              </div>
             </div>
           </div>
         </div>

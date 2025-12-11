@@ -288,7 +288,7 @@ const AppointmentTable = ({ doctor }) => {
 
   return (
     <div
-      className={`overflow-x-auto bg-white ${
+      className={`overflow-x-auto  bg-white border-2 border-secondary shadow-xl ${
         fadeinright ? "animate-fadeInRight" : ""
       }${fadeinleft ? "animate-fadeInLeft" : ""}`}
     >
