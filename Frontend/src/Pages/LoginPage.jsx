@@ -216,14 +216,14 @@ const LoginPage = () => {
             { withCredentials: true }
           );
           if (verify.data) {
-            if (!cookies) {
-              localStorage.setItem("user", JSON.stringify(verify.data));
-              setUser(verify.data);
-              setIsDoctor(false);
-              setTemptDoctorId(null);
-              setDoctorCode("");
-              toast.success(`Welcome back ${verify.data.fullname}`);
-            }
+            // if (!cookies) {
+            localStorage.setItem("user", JSON.stringify(verify.data));
+            // }
+            setUser(verify.data);
+            setIsDoctor(false);
+            setTemptDoctorId(null);
+            setDoctorCode("");
+            toast.success(`Welcome back ${verify.data.fullname}`);
           }
         } catch (error) {
           toast.error("Something is wrong!");

@@ -4,6 +4,8 @@ import NotFoundPage from "./Pages/NotFoundPage.jsx";
 import NewAppointment from "./Pages/NewAppointment.jsx";
 import LoginPage from "./Pages/LoginPage.jsx";
 import AllAppointmentPage from "./Pages/AllAppointmentPage.jsx";
+import DoctorAppointments from "./Doctorpages/AllDoctorAppointments.jsx";
+import DoctorRoute from "./Doctorpages/DoctorRoute.jsx";
 import AboutMePage from "./Pages/AboutMePage.jsx";
 import { Route, Routes, useMatch, useLocation } from "react-router-dom";
 import AppointmentPage from "./Pages/AppointmentPage.jsx";
@@ -23,6 +25,7 @@ function App() {
     "/Account",
     "/MyAppointments",
     "/AboutMe",
+    "/Doctor/MyAppointments",
   ];
   const StarRoute = ["/AboutMe"];
 
@@ -48,6 +51,14 @@ function App() {
             <Route path="/AboutMe" element={<AboutMePage />} />
             <Route path="/MyAppointments" element={<AllAppointmentPage />} />
             <Route path="/Account" element={<LoginPage />} />
+            <Route
+              path="/Doctor/MyAppointments"
+              element={
+                <DoctorRoute>
+                  <DoctorAppointments />
+                </DoctorRoute>
+              }
+            />
             <Route path="/*" element={<NotFoundPage />} />
           </Routes>
         </main>

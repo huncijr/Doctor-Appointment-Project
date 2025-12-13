@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
-
+import { useAuth } from "../Context/CheckAuth";
 const Navbar = () => {
+  let { user } = useAuth();
   const activeStyle = "text-secondary border-secondary";
   return (
     <header
@@ -34,6 +35,16 @@ const Navbar = () => {
       >
         MY ACCOUNT
       </NavLink>
+      {user && user.role === "doctor" && (
+        <NavLink
+          to="/Doctor/MyAppointments"
+          className={({ isActive }) =>
+            `${isActive ? activeStyle : "text-white"}`
+          }
+        >
+          MyAppointments!
+        </NavLink>
+      )}
     </header>
   );
 };

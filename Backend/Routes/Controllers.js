@@ -1,5 +1,5 @@
 import express from "express";
-import generateToken from "../utils/GenerateToken.js";
+import { generateToken } from "../utils/GenerateToken.js";
 import bcrypt from "bcryptjs";
 import { Appointment, User, Doctor } from "../DataBase/Schemas.js";
 import dotenv from "dotenv";
@@ -9,7 +9,8 @@ import rateLimit from "../DataBase/Upstash.js";
 
 export const Protect = async (req, res, next) => {
   const token = req.cookies.jwt;
-  if (!token) return res.status(200).json({ loggedIn: false });
+  if (!token)
+    return res.status(401).json({ loggedIn: false, message: "Unathorized" });
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     req.user = await User.findById(decoded.id).select("-password");
@@ -71,7 +72,7 @@ export const GetRegistration = async (req, res) => {
       registered,
       role,
     });
-    const token = generateToken(user._id);
+    const token = generateToken(user);
     if (cookies) {
       res.cookie("jwt", token, {
         httpOnly: true,
@@ -108,7 +109,7 @@ export const GetLogin = async (req, res) => {
         .status(200)
         .json({ requiresDoctorCode: true, userId: user._id });
     }
-    const token = generateToken(user._id);
+    const token = generateToken(user);
     if (cookies) {
       res.cookie("jwt", token, {
         httpOnly: true,
@@ -139,7 +140,7 @@ export const verifyDoctorCode = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const token = generateToken(user._id);
+    const token = generateToken(user);
     res.status(200).json({
       _id: user._id,
       username: user.username,
@@ -362,40 +363,62 @@ export const GetTimes = async (req, res) => {
   }
 };
 
-export const createDoctor = async (req, res) => {
-  try {
-    const {
-      fullname,
-      username,
-      password,
-      gender,
-      age,
-      registered,
-      doctorCode,
-      role,
-    } = req.body;
-    if (!fullname || !username || !password || !doctorCode) {
-      return res.status(404).json({ message: "Missing" });
-    }
-    const exists = await User.findOne({ username });
-    if (exists) {
-      return res.status(400).json({ message: "username already exists" });
-    }
-    const hashedDoctorCode = await bcrypt.hash(String(doctorCode), 10);
+export const doctorOnly = (req, res, next) => {
+  if (!req.user || req.user.role !== "doctor") {
+    return res.status(403).json({ message: "Doctors only" });
+  }
+  next();
+};
 
-    const user = await User.create({
-      username,
-      fullname,
-      password,
-      gender,
-      age,
-      registered,
-      doctorCode: hashedDoctorCode,
-      role: "doctor",
+export const GetforDoctorsAppointment = async (req, res) => {
+  try {
+    const doctorProfile = await Doctor.findOne({ fullname: req.user.fullname });
+    if (!doctorProfile) {
+      return res.status(404).json({ message: "Doctor Profile not found!" });
+    }
+    res.status(200).json({
+      doctor: doctorProfile,
     });
-    return res.status(201).json({ message: "created" });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error" });
   }
 };
+
+// export const createDoctor = async (req, res) => {
+//   try {
+//     const {
+//       fullname,
+//       username,
+//       password,
+//       gender,
+//       age,
+//       registered,
+//       doctorCode,
+//       role,
+//     } = req.body;
+//     if (!fullname || !username || !password || !doctorCode) {
+//       return res.status(404).json({ message: "Missing" });
+//     }
+//     const exists = await User.findOne({ username });
+//     if (exists) {
+//       return res.status(400).json({ message: "username already exists" });
+//     }
+//     const hashedDoctorCode = await bcrypt.hash(String(doctorCode), 10);
+
+//     const user = await User.create({
+//       username,
+//       fullname,
+//       password,
+//       gender,
+//       age,
+//       registered,
+//       doctorCode: hashedDoctorCode,
+//       role: "doctor",
+//     });
+//     return res.status(201).json({ message: "created" });
+//   } catch (error) {
+//     console.log(error);
+//     return res.status(500).json({ message: "Server error" });
+//   }
+// };
