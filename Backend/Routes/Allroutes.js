@@ -38,7 +38,6 @@ AppRoutes.get(
   doctorOnly,
   GetforDoctorsAppointment
 );
-// AppRoutes.post("/doctor/register", createDoctor);
 
 AppRoutes.get("/checkAuth", Protect, (req, res) => {
   res.json({

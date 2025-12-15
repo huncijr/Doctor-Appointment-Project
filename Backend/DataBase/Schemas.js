@@ -35,6 +35,7 @@ const UserSchema = new mongoose.Schema(
       enum: ["user", "doctor"],
       default: "user",
     },
+    appointmentID: { type: Number, required: false },
   },
   { timestamps: true }
 );

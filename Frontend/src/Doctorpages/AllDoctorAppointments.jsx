@@ -1,11 +1,25 @@
 import Navbar from "../Components/Navbar";
 import { useAuth } from "../Context/CheckAuth";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pagination } from "flowbite-react";
+import { API } from "../Context/AppointmentAPI";
 const DoctorAppointments = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const onPageChange = (page) => setCurrentPage(page);
   const { user } = useAuth();
+  useEffect(() => {
+    const FetchAppointments = async () => {
+      try {
+        const response = await API.get("/Doctor/Appointments", {
+          withCredentials: true,
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    FetchAppointments();
+  }, []);
   return (
     <div className="relative flex flex-col z-10 ">
       <Navbar />;

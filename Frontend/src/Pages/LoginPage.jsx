@@ -163,7 +163,6 @@ const LoginPage = () => {
           gender: gender,
           registered: true,
           role: "user",
-          cookies,
         },
         {
           withCredentials: true,
@@ -197,13 +196,12 @@ const LoginPage = () => {
         {
           username: loginusername,
           password: loginpassword,
-          cookies,
         },
         {
           withCredentials: true,
         }
       );
-      console.log(response);
+      console.log(response.data);
       if (temptdoctorid && isdoctor) {
         try {
           console.log("lefutottam");

@@ -9,11 +9,14 @@ import rateLimit from "../DataBase/Upstash.js";
 
 export const Protect = async (req, res, next) => {
   const token = req.cookies.jwt;
+  console.log(token);
   if (!token)
     return res.status(401).json({ loggedIn: false, message: "Unathorized" });
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    req.user = await User.findById(decoded.id).select("-password");
+    console.log(decoded);
+    req.user = await User.findById(decoded.userId).select("-password");
+    console.log(req.user);
     next();
   } catch (error) {
     res.status(401).json({ message: "Not authorized" });
@@ -49,16 +52,8 @@ export const GetDoctorsById = async (req, res) => {
 
 export const GetRegistration = async (req, res) => {
   try {
-    const {
-      fullname,
-      age,
-      username,
-      password,
-      gender,
-      registered,
-      role,
-      cookies,
-    } = req.body;
+    const { fullname, age, username, password, gender, registered, role } =
+      req.body;
     const UserExists = await User.findOne({ username });
     if (UserExists) {
       return res.status(400).json({ message: "User already exists" });
@@ -73,14 +68,12 @@ export const GetRegistration = async (req, res) => {
       role,
     });
     const token = generateToken(user);
-    if (cookies) {
-      res.cookie("jwt", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-      });
-    }
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
     res.status(201).json({
       _id: user._id,
       username: user.username,
@@ -95,7 +88,7 @@ export const GetRegistration = async (req, res) => {
 
 export const GetLogin = async (req, res) => {
   try {
-    const { username, password, cookies } = req.body;
+    const { username, password } = req.body;
     const user = await User.findOne({ username });
     if (!user) {
       return res.status(401).json({ message: "Invalid username or password" });
@@ -110,14 +103,12 @@ export const GetLogin = async (req, res) => {
         .json({ requiresDoctorCode: true, userId: user._id });
     }
     const token = generateToken(user);
-    if (cookies) {
-      res.cookie("jwt", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-      });
-    }
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
     res.status(200).json({
       _id: user._id,
       username: user.username,
@@ -141,6 +132,7 @@ export const verifyDoctorCode = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
     const token = generateToken(user);
+    console.log(token);
     res.status(200).json({
       _id: user._id,
       username: user.username,
@@ -364,6 +356,7 @@ export const GetTimes = async (req, res) => {
 };
 
 export const doctorOnly = (req, res, next) => {
+  console.log(req.user.role);
   if (!req.user || req.user.role !== "doctor") {
     return res.status(403).json({ message: "Doctors only" });
   }
@@ -373,6 +366,7 @@ export const doctorOnly = (req, res, next) => {
 export const GetforDoctorsAppointment = async (req, res) => {
   try {
     const doctorProfile = await Doctor.findOne({ fullname: req.user.fullname });
+    console.log(doctorProfile);
     if (!doctorProfile) {
       return res.status(404).json({ message: "Doctor Profile not found!" });
     }
@@ -387,36 +381,32 @@ export const GetforDoctorsAppointment = async (req, res) => {
 
 // export const createDoctor = async (req, res) => {
 //   try {
-//     const {
-//       fullname,
-//       username,
-//       password,
-//       gender,
-//       age,
-//       registered,
-//       doctorCode,
-//       role,
-//     } = req.body;
-//     if (!fullname || !username || !password || !doctorCode) {
-//       return res.status(404).json({ message: "Missing" });
-//     }
-//     const exists = await User.findOne({ username });
-//     if (exists) {
-//       return res.status(400).json({ message: "username already exists" });
-//     }
-//     const hashedDoctorCode = await bcrypt.hash(String(doctorCode), 10);
+//     const doctors = await User.find({ role: "doctor" });
+//     console.log("Doctors found:", doctors.length);
+//     let appointmentCounter = 1;
+//     const result = [];
 
-//     const user = await User.create({
-//       username,
-//       fullname,
-//       password,
-//       gender,
-//       age,
-//       registered,
-//       doctorCode: hashedDoctorCode,
-//       role: "doctor",
-//     });
-//     return res.status(201).json({ message: "created" });
+//     for (let doc of doctors) {
+//       const token = generateToken(doc);
+//       console.log(doc._id);
+//       let user = await User.findByIdAndUpdate(
+//         doc._id,
+//         { $set: { appointmentID: appointmentCounter } },
+//         { new: true, strict: false }
+//       );
+//       console.log("After update:", user.appointmentID);
+//       result.push({
+//         user,
+//         token,
+//         appointmentID: appointmentCounter,
+//       });
+
+//       appointmentCounter += 1;
+//     }
+
+//     return res
+//       .status(200)
+//       .json({ message: "Doctors updated", doctors: result });
 //   } catch (error) {
 //     console.log(error);
 //     return res.status(500).json({ message: "Server error" });

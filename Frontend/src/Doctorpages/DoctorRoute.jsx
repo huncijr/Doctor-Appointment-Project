@@ -3,7 +3,7 @@ import { useAuth } from "../Context/CheckAuth";
 const DoctorRoute = ({ children }) => {
   const { user } = useAuth();
   if (!user || user.role !== "doctor") {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/Home" replace />;
   }
   return children;
 };
