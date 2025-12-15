@@ -9,14 +9,14 @@ import rateLimit from "../DataBase/Upstash.js";
 
 export const Protect = async (req, res, next) => {
   const token = req.cookies.jwt;
-  console.log(token);
+  // console.log(token);
   if (!token)
     return res.status(401).json({ loggedIn: false, message: "Unathorized" });
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    console.log(decoded);
+    // console.log(decoded);
     req.user = await User.findById(decoded.userId).select("-password");
-    console.log(req.user);
+    // console.log(req.user);
     next();
   } catch (error) {
     res.status(401).json({ message: "Not authorized" });
@@ -68,6 +68,7 @@ export const GetRegistration = async (req, res) => {
       role,
     });
     const token = generateToken(user);
+    console.log(token);
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -133,6 +134,12 @@ export const verifyDoctorCode = async (req, res) => {
     }
     const token = generateToken(user);
     console.log(token);
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+    });
     res.status(200).json({
       _id: user._id,
       username: user.username,
@@ -356,7 +363,6 @@ export const GetTimes = async (req, res) => {
 };
 
 export const doctorOnly = (req, res, next) => {
-  console.log(req.user.role);
   if (!req.user || req.user.role !== "doctor") {
     return res.status(403).json({ message: "Doctors only" });
   }
@@ -366,12 +372,18 @@ export const doctorOnly = (req, res, next) => {
 export const GetforDoctorsAppointment = async (req, res) => {
   try {
     const doctorProfile = await Doctor.findOne({ fullname: req.user.fullname });
-    console.log(doctorProfile);
+    console.log(doctorProfile._id);
+    const findappointments = await Appointment.find({
+      doctorid: doctorProfile._id,
+    })
+      .sort({ date: 1, time: 1 })
+      .limit(10);
+    console.log(findappointments);
     if (!doctorProfile) {
       return res.status(404).json({ message: "Doctor Profile not found!" });
     }
     res.status(200).json({
-      doctor: doctorProfile,
+      findappointments,
     });
   } catch (error) {
     console.log(error);
