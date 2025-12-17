@@ -364,3 +364,45 @@
   opacity: 0.5;
   animation: twinkle 3s infinite ease-in-out;
 }
+@media (min-width: 640px) and (hover: hover) {
+  .card {
+    transition: transform 1.5s ease-out;
+    transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    box-shadow: 1.5s ease-out;
+  }
+  .card:hover {
+    transform: scaleX(1.1) scale(1.1);
+    transition: transform 1s ease-in;
+    box-shadow: 1s ease-in;
+    z-index: 0;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  }
+  .card::after {
+    content: "";
+    position: absolute;
+    inset: 20;
+    pointer-events: none;
+    opacity: 0;
+    filter: blur(1);
+    transition: opacity 1 ease-out;
+    border-radius: inherit;
+  }
+  .card:hover::after {
+    opacity: 1;
+    transition: opacity 2s ease-in;
+  }
+}
+.card.removing {
+  opacity: 0;
+  transform: scale(0.7) translatey(-10px);
+  pointer-events: none;
+}
+.custom-list {
+  list-style: disc;
+  padding-left: 20px;
+}
+
+.custom-list li::marker {
+  color: red;
+  font-size: 2rem;
+}

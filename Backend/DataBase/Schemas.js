@@ -89,6 +89,10 @@ const AppointmentSchema = new mongoose.Schema(
     reason: {
       type: String,
     },
+    completed: {
+      type: Boolean,
+      required: false,
+    },
   },
   { timestamps: true }
 );

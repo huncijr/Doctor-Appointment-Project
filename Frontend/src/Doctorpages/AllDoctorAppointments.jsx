@@ -3,12 +3,21 @@ import { useAuth } from "../Context/CheckAuth";
 import { useEffect, useState } from "react";
 import { Pagination, Badge } from "flowbite-react";
 import { API } from "../Context/AppointmentAPI";
-import { Check, X, BadgeCheck, Timer, User, CalendarRange } from "lucide-react";
+import {
+  Check,
+  X,
+  BadgeCheck,
+  Timer,
+  User,
+  CalendarRange,
+  LaptopMinimalCheck,
+} from "lucide-react";
 const DoctorAppointments = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [upcomingappointments, setUpcomingAppointments] = useState(null);
-  const [completedappointments, setCompletedAppointments] = useState(null);
-  const [otherappointments, setOtherAppointments] = useState(null);
+  const [upcomingappointments, setUpcomingAppointments] = useState([]);
+  const [completedappointments, setCompletedAppointments] = useState([]);
+  const [otherappointments, setOtherAppointments] = useState([]);
+
   const onPageChange = (page) => setCurrentPage(page);
   const { user } = useAuth();
   useEffect(() => {
@@ -17,7 +26,21 @@ const DoctorAppointments = () => {
         const response = await API.get("/Doctor/Appointments", {
           withCredentials: true,
         });
-        setUpcomingAppointments(response.data.findappointments);
+        const normalized = response.data.findappointments.map((app) => ({
+          ...app,
+          isRemoving: false,
+        }));
+        const upcoming = [];
+        const completed = [];
+        normalized.forEach((app) => {
+          if (app.completed) {
+            completed.push(app);
+          } else {
+            upcoming.push(app);
+          }
+        });
+        setUpcomingAppointments(upcoming);
+        setCompletedAppointments(completed);
       } catch (error) {
         console.error(error);
       }
@@ -33,7 +56,38 @@ const DoctorAppointments = () => {
     const dayName = newdate.toLocaleDateString("en-US", { weekday: "long" });
     return dayName;
   };
+  const handleDelete = async (appointmentid) => {
+    try {
+      const res = await API.delete("/DeleteAppointment", {
+        data: { appointmentid },
+      });
+      setUpcomingAppointments((prev) =>
+        prev.map((app) =>
+          app._id === appointmentid ? { ...app, isRemoving: true } : app
+        )
+      );
 
+      setTimeout(() => {
+        setUpcomingAppointments((prev) =>
+          prev.filter((app) => app._id !== appointmentid)
+        );
+      }, 1000);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const handleAddCompleted = async (appointmentid) => {
+    console.log(appointmentid);
+    try {
+      const response = await API.put("/AddCompleted", { appointmentid });
+      console.log(response.data);
+      setCompletedAppointments((prev) => {
+        return [...prev, response.data];
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
   return (
     <div className="relative flex flex-col z-10 ">
       <Navbar />;
@@ -44,27 +98,81 @@ const DoctorAppointments = () => {
       </div>
       <div className="flex flex-col  justify-start p-5">
         <div className="flex items-center flex-col justify-center sm:items-start sm:justify-start py-10">
+          {completedappointments && completedappointments.length > 0 && (
+            <>
+              <span className="text-white tracking-widest changa-one text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-bold hover-doubleline">
+                Completed
+              </span>
+              <div
+                className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4  gap-5 mt-10 animate-fadeInBottom mb-5 `}
+              >
+                {completedappointments.length > 0 ? (
+                  completedappointments.map((appointment) => (
+                    <div
+                      disabled
+                      key={appointment._id}
+                      className="relative bg-white/90 border-2 h-[400px]  p-3 opacity-50 cursor-not-allowed "
+                    >
+                      <div className="py-4 flex flex-col  items-center  justify-center ">
+                        <span className="font-bold text-green-700 text-xl md:text-2xl lg:text-3xl py-2">
+                          SUCCESS !
+                        </span>
+                        <LaptopMinimalCheck
+                          size={50}
+                          className="h-[20%] animate-pulse rounded-full text-green-700 "
+                        />
+                        <div className="py-2 w-full">
+                          <hr className="border-2 border-black"></hr>
+                        </div>
+                        <div className="flex flex-col justify-between gap-1">
+                          <ul className="custom-list font-bold text-2xl">
+                            <li className=" ">{appointment.fullname}</li>
+                            <li className=" ">{appointment.date}</li>
+                            <li className=" ">{appointment.time}</li>
+                          </ul>
+                        </div>
+                        <div className="py-2 w-full ">
+                          <hr className="border-2 border-black"></hr>
+                          <div className="py-2 text-sm  text-center max-h-40 break-words overflow-y-auto ">
+                            {appointment.message}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div>No completed found today</div>
+                )}
+              </div>
+            </>
+          )}
           <span className="text-white tracking-widest changa-one text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-bold hover-doubleline">
             Upcoming
           </span>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 mt-10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 mt-10 animate-fadeInBottom ">
             {upcomingappointments && upcomingappointments.length > 0 ? (
               upcomingappointments.map((app) => (
                 <div
                   key={app._id}
-                  className="relative border-2 bg-white rounded-lg shadow-xl flex flex-col justify-between h-[400px] p-3"
+                  className={`relative border-2 bg-white rounded-lg shadow-xl 
+                  flex flex-col justify-between h-[400px] p-3 card overflow-visible card overflow-y-auto cursor-pointer
+                  ${app.isRemoving ? "removing" : ""}`}
                 >
-                  {/* Gombok */}
                   <div className="flex absolute right-2 top-2 gap-2">
-                    <button className="rounded-full bg-red-700 p-3 hover:bg-red-500">
+                    <button
+                      className="rounded-full bg-red-700 p-3 hover:bg-red-500"
+                      onClick={() => handleDelete(app._id)}
+                    >
                       <X className="text-white" />
                     </button>
-                    <button className="rounded-full bg-green-700 p-3 hover:bg-green-500">
+                    <button
+                      className="rounded-full bg-green-700 p-3 hover:bg-green-500"
+                      onClick={() => handleAddCompleted(app._id)}
+                    >
                       <Check className="text-white" />
                     </button>
                   </div>
 
-                  {/* Fő tartalom */}
                   <div className="flex flex-col gap-2">
                     <span className="lora font-bold tracking-wider">
                       {app.fullname}
@@ -101,7 +209,6 @@ const DoctorAppointments = () => {
                     </div>
                   </div>
 
-                  {/* Vonal + szöveg mindig alul */}
                   <div className="mt-2">
                     <hr className="w-full border-2 border-red-600 mb-2" />
                     <span className="font-bold text-start">{`Associated with ${app.doctorname}`}</span>

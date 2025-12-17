@@ -16,6 +16,7 @@ import {
   GetTimes,
   doctorOnly,
   GetforDoctorsAppointment,
+  AppointmentsCompleted,
 } from "./Controllers.js";
 
 const AppRoutes = express.Router();
@@ -31,6 +32,7 @@ AppRoutes.get("/GetAppointment", GetAppointment);
 AppRoutes.get("/GetAllappointment", GetDoctorAppointments);
 AppRoutes.delete("/DeleteAppointment", DeleteAppointment);
 AppRoutes.get("/GetTimes", GetTimes);
+AppRoutes.put("/AddCompleted", AppointmentsCompleted);
 
 AppRoutes.get(
   "/Doctor/Appointments",

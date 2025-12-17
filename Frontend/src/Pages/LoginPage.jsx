@@ -610,15 +610,17 @@ const LoginPage = () => {
                       </div>
                     </Toast>
                   )}
-                  <Button
-                    color="red"
-                    pill
-                    className="gap-1"
-                    onClick={() => setShowToast(true)}
-                  >
-                    <Trash2 />
-                    Delete Account
-                  </Button>
+                  {user.role != "doctor" && (
+                    <Button
+                      color="red"
+                      pill
+                      className="gap-1"
+                      onClick={() => setShowToast(true)}
+                    >
+                      <Trash2 />
+                      Delete Account
+                    </Button>
+                  )}
                 </div>
                 <div className="flex justify-center items-center py-3">
                   <Button

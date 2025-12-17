@@ -217,6 +217,7 @@ export const MakeAnAppointment = async (req, res) => {
       time,
       message,
       reason,
+      completed,
     } = req.body;
     let user = await User.findOne({ username });
     let userappointments = await Appointment.countDocuments({ userid: id });
@@ -239,6 +240,7 @@ export const MakeAnAppointment = async (req, res) => {
       time,
       message,
       reason,
+      completed,
     });
     res.status(201).json();
   } catch (error) {
@@ -325,6 +327,7 @@ export const GetDoctorAppointments = async (req, res) => {
 export const DeleteAppointment = async (req, res) => {
   try {
     const { appointmentid } = req.body;
+    console.log(appointmentid);
     const appointment = await Appointment.findById(appointmentid);
     if (!appointment) {
       return res.status(404).json({ message: "Appointment wasnt found" });
@@ -372,13 +375,11 @@ export const doctorOnly = (req, res, next) => {
 export const GetforDoctorsAppointment = async (req, res) => {
   try {
     const doctorProfile = await Doctor.findOne({ fullname: req.user.fullname });
-    console.log(doctorProfile._id);
     const findappointments = await Appointment.find({
       doctorid: doctorProfile._id,
     })
       .sort({ date: 1, time: 1 })
       .limit(10);
-    console.log(findappointments);
     if (!doctorProfile) {
       return res.status(404).json({ message: "Doctor Profile not found!" });
     }
@@ -388,6 +389,27 @@ export const GetforDoctorsAppointment = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+export const AppointmentsCompleted = async (req, res) => {
+  const { appointmentid } = req.body;
+  try {
+    const findAppointment = await Appointment.findOne({ _id: appointmentid });
+    if (!findAppointment) {
+      return res.status(404).json({ message: "appointment was not found" });
+    }
+    let updatedAppointment = findAppointment
+      ? await Appointment.findByIdAndUpdate(
+          { _id: findAppointment._id },
+          { $set: { completed: true } },
+          { new: true }
+        )
+      : null;
+    console.log(updatedAppointment);
+    res.status(200).json(updatedAppointment);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
   }
 };
 
