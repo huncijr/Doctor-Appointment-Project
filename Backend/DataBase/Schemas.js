@@ -93,6 +93,18 @@ const AppointmentSchema = new mongoose.Schema(
       type: Boolean,
       required: false,
     },
+    disabled: {
+      type: Boolean,
+      required: false,
+    },
+    review: {
+      type: String,
+      required: false,
+    },
+    rating: {
+      type: Number,
+      required: false,
+    },
   },
   { timestamps: true }
 );

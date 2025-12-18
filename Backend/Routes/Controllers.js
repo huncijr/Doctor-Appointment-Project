@@ -49,6 +49,18 @@ export const GetDoctorsById = async (req, res) => {
     console.log(error);
   }
 };
+export const GetADoctor = async (req, res) => {
+  try {
+    const { doctorid } = req.query;
+    const finddoctor = await Doctor.findOne({ _id: doctorid });
+    if (!finddoctor) {
+      return res.status(404).json({ message: "Doctor was not found" });
+    }
+    res.status(200).json(finddoctor);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 export const GetRegistration = async (req, res) => {
   try {
@@ -218,6 +230,7 @@ export const MakeAnAppointment = async (req, res) => {
       message,
       reason,
       completed,
+      disabled,
     } = req.body;
     let user = await User.findOne({ username });
     let userappointments = await Appointment.countDocuments({ userid: id });
@@ -241,6 +254,7 @@ export const MakeAnAppointment = async (req, res) => {
       message,
       reason,
       completed,
+      disabled,
     });
     res.status(201).json();
   } catch (error) {
@@ -281,6 +295,51 @@ export const GetAppointment = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+export const UpdatedAppointment = async (req, res) => {
+  let { appointmentid } = req.body;
+  try {
+    const findappointment = await Appointment.find({ _id: appointmentid });
+    if (!findappointment) {
+      return res.status(404).json({ message: "appointment was not found" });
+    }
+    console.log(findappointment._id);
+    const updateappointment = findappointment
+      ? await Appointment.findByIdAndUpdate(
+          findappointment[0]._id,
+          { $set: { disabled: true } },
+          { new: true }
+        )
+      : null;
+
+    console.log(updateappointment);
+    return res.status(200).json(updateappointment);
+  } catch (error) {
+    console.error(error);
+  }
+};
+export const ReviewAppointments = async (req, res) => {
+  let { appointmentid, message, rating } = req.body;
+  const findappointment = await Appointment.find({ _id: appointmentid });
+  if (!findappointment) {
+    return res
+      .status(404)
+      .json({ succes: false, message: "Appointment was not found" });
+  }
+  const updateappointment = findappointment
+    ? await Appointment.findByIdAndUpdate(
+        findappointment[0]._id,
+        { $set: { review: message, rating: rating, disabled: true } },
+        { new: true }
+      )
+    : null;
+  console.log(updateappointment);
+  res.status(200).json({ succes: true });
+  try {
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const GetDoctorAppointments = async (req, res) => {
   try {
     let { doctorIds } = req.query;

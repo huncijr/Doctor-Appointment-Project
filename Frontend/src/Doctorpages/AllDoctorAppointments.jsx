@@ -84,6 +84,17 @@ const DoctorAppointments = () => {
       setCompletedAppointments((prev) => {
         return [...prev, response.data];
       });
+      setUpcomingAppointments((prev) =>
+        prev.map((app) =>
+          app._id === appointmentid ? { ...app, isRemoving: true } : app
+        )
+      );
+
+      setTimeout(() => {
+        setUpcomingAppointments((prev) =>
+          prev.filter((app) => app._id !== appointmentid)
+        );
+      }, 1000);
     } catch (error) {
       console.error(error);
     }
@@ -216,7 +227,11 @@ const DoctorAppointments = () => {
                 </div>
               ))
             ) : (
-              <div>No appointments found</div>
+              <div className="flex relative">
+                <span className="changa-one font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl text-secondary ">
+                  No appointments found !
+                </span>
+              </div>
             )}
           </div>
         </div>

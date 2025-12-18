@@ -3,6 +3,7 @@ import {
   Protect,
   GetDoctors,
   GetDoctorsById,
+  GetADoctor,
   GetRegistration,
   GetLogin,
   verifyDoctorCode,
@@ -11,6 +12,8 @@ import {
   rateLimiterMiddleware,
   MakeAnAppointment,
   GetAppointment,
+  UpdatedAppointment,
+  ReviewAppointments,
   GetDoctorAppointments,
   DeleteAppointment,
   GetTimes,
@@ -22,13 +25,20 @@ import {
 const AppRoutes = express.Router();
 AppRoutes.get("/AllDoctor", GetDoctors);
 AppRoutes.get("/Doctor", GetDoctorsById);
+AppRoutes.get("/ADoctor", GetADoctor);
 AppRoutes.post("/Signup", GetRegistration);
 AppRoutes.post("/Login", GetLogin);
 AppRoutes.post("/Doctor-verify", verifyDoctorCode);
 AppRoutes.delete("/Delete/:id", DeleteUser);
 AppRoutes.post("/SignOut", SignOutUser);
-AppRoutes.post("/Appointment", rateLimiterMiddleware, MakeAnAppointment);
+AppRoutes.post("/Appointment", MakeAnAppointment);
 AppRoutes.get("/GetAppointment", GetAppointment);
+AppRoutes.put("/UpdatedAppointment", UpdatedAppointment);
+AppRoutes.put(
+  "/ReviewUpdateAppointments",
+  rateLimiterMiddleware,
+  ReviewAppointments
+);
 AppRoutes.get("/GetAllappointment", GetDoctorAppointments);
 AppRoutes.delete("/DeleteAppointment", DeleteAppointment);
 AppRoutes.get("/GetTimes", GetTimes);

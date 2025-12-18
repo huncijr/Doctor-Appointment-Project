@@ -278,13 +278,6 @@ const AppointmentTable = ({ doctor }) => {
     setWeekdays(formatlastweek);
     setAppearWeekDays(handlelastweek);
   }
-  useEffect(() => {
-    if (weekdays >= oldweeks) {
-      console.log(oldweeks, "kisebb mint", weekdays);
-    } else {
-      console.log(oldweeks, "nagyobb mint", weekdays);
-    }
-  }, [weekdays, oldweeks]);
 
   return (
     <div
