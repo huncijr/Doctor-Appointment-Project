@@ -233,12 +233,15 @@ export const MakeAnAppointment = async (req, res) => {
       disabled,
     } = req.body;
     let user = await User.findOne({ username });
-    let userappointments = await Appointment.countDocuments({ userid: id });
-    if (userappointments > 5) {
-      return res
-        .status(409)
-        .json({ message: "You cannot create more than 5 appointments" });
-    }
+    let activeuserappointments = await Appointment.countDocuments({
+      userid: id,
+      disabled: { $ne: true },
+    });
+    // if (activeuserappointments > 4 && activeuserappointments) {
+    //   return res
+    //     .status(409)
+    //     .json({ message: "You cannot create more than 5 appointments" });
+    // }
     if (!user) return res.status(404).json({ Message: "User was not found" });
     const selecteddoctor = await Doctor.findById(doctorid);
     if (!selecteddoctor)
@@ -332,8 +335,7 @@ export const ReviewAppointments = async (req, res) => {
         { new: true }
       )
     : null;
-  console.log(updateappointment);
-  res.status(200).json({ succes: true });
+  res.status(200).json({ success: true });
   try {
   } catch (error) {
     console.error(error);
@@ -434,16 +436,27 @@ export const doctorOnly = (req, res, next) => {
 export const GetforDoctorsAppointment = async (req, res) => {
   try {
     const doctorProfile = await Doctor.findOne({ fullname: req.user.fullname });
-    const findappointments = await Appointment.find({
-      doctorid: doctorProfile._id,
-    })
-      .sort({ date: 1, time: 1 })
-      .limit(10);
     if (!doctorProfile) {
       return res.status(404).json({ message: "Doctor Profile not found!" });
     }
+    const Appointments = await Appointment.find({
+      doctorid: doctorProfile._id,
+      completed: false,
+      disabled: { $ne: true },
+    })
+      .sort({ date: 1, time: 1 })
+      .limit(15);
+    const CompletedAppointments = await Appointment.find({
+      doctorid: doctorProfile._id,
+      completed: true,
+    })
+      .sort({ updatedAt: -1 })
+      .limit(5);
+    console.log(Appointments.length);
+    console.log(CompletedAppointments.length);
     res.status(200).json({
-      findappointments,
+      upcoming: Appointments,
+      completed: CompletedAppointments,
     });
   } catch (error) {
     console.log(error);

@@ -97,13 +97,12 @@ const AllAppointmentPage = () => {
         appointmentid: id,
       });
       console.log(response.data);
-      setCompletedAppointments((prev) =>
-        prev.filter((app) => app.disable !== false)
-      );
+      setCompletedAppointments((prev) => prev.filter((app) => app._id !== id));
     } catch (error) {
       console.error(error);
     }
   };
+
   const handleReview = (e, id) => {
     try {
       setReviewLoading(true);
@@ -191,6 +190,7 @@ const AllAppointmentPage = () => {
     }, 2000);
     setDeleteTimeout(timeout);
   };
+
   return (
     <div>
       <div className="relative flex flex-col items-center z-10">
@@ -307,7 +307,7 @@ const AllAppointmentPage = () => {
         <div className="absolute top-4 right-4 flex flex-col gap-3 z-50">
           {completedappointments.length > 0 &&
             completedappointments.map((app) => (
-              <Toast className=" opacity-90">
+              <Toast className=" opacity-90 animate-slide-right" key={app._id}>
                 <div className="flex items-start">
                   <div className="inline-flex h-10 w-10 shrink-0 items-center rounded-lg bg-secondary text-white ">
                     <FileChartColumn className="ml-2" />
