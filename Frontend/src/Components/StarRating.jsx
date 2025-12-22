@@ -11,8 +11,10 @@ const StarRating = ({ maxStars = 5, onChange }) => {
         <span
           key={star}
           onClick={() => handleClick(star)}
-          className={`cursor-pointer text-5xl ${
-            star <= rating ? "text-yellow-400" : "text-gray-300"
+          className={`cursor-pointer text-5xl  ${
+            star <= rating
+              ? "text-yellow-400 hover:text-yellow-300"
+              : "text-gray-300 hover:text-gray-200"
           }`}
         >
           ★

@@ -17,6 +17,9 @@ import {
   ToastToggle,
   Label,
   Textarea,
+  Badge,
+  Rating,
+  RatingStar,
 } from "flowbite-react";
 import StarRating from "../Components/StarRating";
 import {
@@ -25,6 +28,12 @@ import {
   FileChartColumn,
   NotebookPen,
   Sticker,
+  Calendar,
+  Clock,
+  FileUser,
+  CheckCheck,
+  Info,
+  BookMarked,
 } from "lucide-react";
 import { API } from "../Context/AppointmentAPI";
 import { useEffect, useState, useRef } from "react";
@@ -38,6 +47,7 @@ const AllAppointmentPage = () => {
   const { user, setUser } = useAuth();
   const [appointments, setAppointments] = useState([]);
   const [completedappointments, setCompletedAppointments] = useState([]);
+  const [alreadyappointments, setAlreadyAppointments] = useState([]);
   const [reviewappointment, setReviewAppointment] = useState([]);
   const [loading, setLoading] = useState(true);
   const [waitdelete, setWaitDelete] = useState(false);
@@ -58,22 +68,26 @@ const AllAppointmentPage = () => {
             userid: user._id,
           },
         });
+        const already = [];
         const normal = [];
         const completed = [];
         const filterAppointments = res.data.appointments.forEach((app) => {
-          if (app.completed && !app.disabled) {
-            completed.push(app);
+          if (app.completed) {
+            already.push(app);
+            if (!app.disabled) {
+              completed.push(app);
+            }
           } else if (!app.disabled) {
             normal.push(app);
           }
         });
+        setAlreadyAppointments(already);
         setCompletedAppointments(completed);
         setAppointments(normal);
       } catch (error) {
         if (error.response && error.response.status === 404) {
-          return;
+          console.log(error);
         }
-        console.log(error);
       } finally {
         setLoading(false);
       }
@@ -83,8 +97,8 @@ const AllAppointmentPage = () => {
     }
   }, [user]);
   useEffect(() => {
-    console.log(completedappointments);
-  }, [appointments, completedappointments]);
+    console.log(alreadyappointments);
+  }, [appointments, alreadyappointments]);
   useEffect(() => {
     console.log(selecteddoctor);
   }, [selecteddoctor]);
@@ -155,6 +169,42 @@ const AllAppointmentPage = () => {
     const newlength =
       message.length > length ? message.slice(0, length) + "..." : message;
     return newlength;
+  };
+
+  const handleRating = (rating) => {
+    if (rating <= 1) return <RatingStar />;
+    if (rating > 1 && rating <= 2)
+      return (
+        <Rating>
+          <RatingStar /> <RatingStar />
+        </Rating>
+      );
+    if (rating > 2 && rating <= 3)
+      return (
+        <Rating>
+          <RatingStar /> <RatingStar />
+          <RatingStar />
+        </Rating>
+      );
+    if (rating > 3 && rating <= 4)
+      return (
+        <Rating>
+          <RatingStar /> <RatingStar />
+          <RatingStar /> <RatingStar />
+        </Rating>
+      );
+    return (
+      <Rating>
+        <RatingStar /> <RatingStar />
+        <RatingStar /> <RatingStar />
+        <RatingStar />
+      </Rating>
+    );
+  };
+  const handleDay = (date) => {
+    const newdate = new Date(date);
+    const dayName = newdate.toLocaleDateString("en-US", { weekday: "long" });
+    return dayName;
   };
   const handleCancel = () => {
     if (CancelDelete.current) {
@@ -350,6 +400,137 @@ const AllAppointmentPage = () => {
               </Toast>
             ))}
         </div>
+        {alreadyappointments.length > 0 && (
+          <div className="flex flex-col ">
+            <div className="animate-fadeInScale">
+              <h1 className="text-center py-5 text-xl sm:text-2xl md:text-3xl lg:text-4xl animate-text-blur anton-regular tracking-widest text-secondary">
+                Already Completed Appointments{" "}
+              </h1>
+            </div>
+            <div className="grid grid-cols-2  md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 h-[20wh] w-full gap-5 opacity-40 ">
+              {alreadyappointments.map((app) => (
+                <div
+                  key={app._id}
+                  className="relative  border-2 bg-white border-secondary animate-fadeInLeft"
+                >
+                  <div className="flex flex-1 justify-between">
+                    <div className="flex flex-[.4] flex-col ">
+                      <span className="font-bold lora tracking-wider px-2">
+                        {app.fullname}
+                      </span>
+                      <div className="inline-flex flex-col gap-1 w-fit">
+                        <Badge icon={Calendar} color="pink">
+                          <span className="font-bold lora tracking-wider px-1">
+                            {app.date}
+                          </span>
+                        </Badge>
+                        <div>
+                          <Badge icon={Clock} color="gray">
+                            <span className="font-bold lora tracking-wider px-1">
+                              {app.time}
+                            </span>{" "}
+                          </Badge>{" "}
+                        </div>
+                        <div>
+                          <Badge icon={Clock} color="info">
+                            <span className="font-bold lora tracking-wider px-1">
+                              {handleDay(app.date)}
+                            </span>{" "}
+                          </Badge>
+                        </div>{" "}
+                      </div>
+                    </div>
+                    <div className="flex flex-[.6] justify-end items-center ">
+                      <div className="border-2 border-gray-700/30 rounded-full p-2 relative right-5">
+                        <FileUser className="w-full h-full text-primary" />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="py-2 ">
+                    <div className="flex flex-col">
+                      <hr className="w-full  border-2 border-red-700" />
+                      <div className="flex justify-between p-2">
+                        <span className="anton-regular"> Your message</span>
+                        {app.disabled === true ? (
+                          <Badge
+                            color="success"
+                            className="inline-flex  items-center gap-2 whitespace-nowrap"
+                          >
+                            {" "}
+                            <CheckCheck className="inline-flex" />{" "}
+                            <span>Already reviewed!</span>
+                          </Badge>
+                        ) : (
+                          <Badge
+                            color="indigo"
+                            className="inline-flex  items-center gap-2 whitespace-nowrap"
+                          >
+                            {" "}
+                            <Info className="inline-flex" />{" "}
+                            <span>No review was added!</span>
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="overflow-y-auto mt-2">
+                        <Textarea
+                          value={app.message}
+                          rows={3}
+                          className="pointer-events-none "
+                        />
+                      </div>
+                      <div>
+                        <Badge
+                          color="failure"
+                          className="m-1 inline-flex rounded-full "
+                        >
+                          <BookMarked className="inline-flex mr-1" />
+                          {app.reason}
+                        </Badge>
+                      </div>
+                      <div className="flex p-2">
+                        <span>
+                          Appointment was made with
+                          <span className="underline text-blue-500">
+                            {" "}
+                            {app.doctorname}
+                          </span>
+                        </span>
+                      </div>
+                      {app.rating ? (
+                        <div className="flex flex-col items-center mt-2">
+                          <hr className="w-full border-2 border-gray-400 mb-1" />
+                          <span className="px-1 text-primary text-2xl mb-2">
+                            Your ratings:
+                          </span>
+                          {handleRating(app.rating)}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-2 border-2 border-gray-500/30 rounded-xl p-1 ">
+                          <span className="text-sm text-center">
+                            There was no review added for this appointment
+                          </span>
+                          <Button
+                            color="dark"
+                            pill
+                            onClick={(e) => {
+                              handleReview(e, app.doctorid),
+                                setIsReview(true),
+                                setReviewAppointment(app);
+                            }}
+                          >
+                            Add a review !
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       {waitdelete && (
         <div className="fixed inset-0 z-50 backdrop:blur-sm bg-black/30">

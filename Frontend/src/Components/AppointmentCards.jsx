@@ -66,7 +66,6 @@ const AppointmentCard = ({ appointment, onDelete, onComplete, handleDay }) => {
         </div>
       </div>
 
-      {/* FOOTER */}
       <div className="mt-2">
         <hr className="w-full border-2 border-red-600 mb-2" />
         <span className="font-bold">{`Associated with ${doctorname}`}</span>

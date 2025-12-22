@@ -114,7 +114,7 @@ const HomePage = () => {
       <NavBar />
       <div className="flex flex-col items-center">
         <div className="animate-fadeInScale">
-          <h1 className="animate-text-blur anton-regular tracking-widest py-14 flex items-center justify-center text-secondary text-7xl">
+          <h1 className="animate-text-blur anton-regular tracking-widest py-14 flex items-center justify-center text-secondary text-6xl">
             {" "}
             Our Place
           </h1>
