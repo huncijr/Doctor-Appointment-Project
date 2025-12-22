@@ -114,6 +114,7 @@ const NewAppointment = () => {
 
   useEffect(() => {
     if (selecteddate) {
+      setTime(null);
       let sendDate = parseDate(selecteddate);
       let formatdate = formatDate(sendDate);
       let [year, month, day] = formatdate.split("-");
@@ -217,7 +218,7 @@ const NewAppointment = () => {
     const newDate = `${year}-${month}-${day}`;
 
     const dates = [usersdate, newDate];
-    console.log("dates", dates);
+    // console.log("dates", dates);
 
     if (dates[0] < dates[1] || dates[0] === dates[1]) {
       toast.error("Date is unavailable");
@@ -251,7 +252,7 @@ const NewAppointment = () => {
     let weekday = new Date(date).toLocaleString("en-US", {
       weekday: "long",
     });
-    console.log(weekday);
+    // console.log(weekday);
     switch (weekday) {
       case "Saturday":
         return false;
@@ -286,7 +287,7 @@ const NewAppointment = () => {
     month = String(Number(month) + 1).padStart(2, "0");
     day = String(day).padStart(2, "0");
     let newDate = `${year}-${month}-${day}`;
-    console.log(newDate);
+    // console.log(newDate);
     try {
       let response = await API.post("Appointment", {
         id: user._id,
@@ -328,10 +329,10 @@ const NewAppointment = () => {
     }
   }
   useEffect(() => {
-    console.log(merged);
+    // console.log(merged);
   }, [merged]);
   useEffect(() => {
-    console.log(selecteddate);
+    // console.log(selecteddate);
   }, [selecteddate]);
 
   return (

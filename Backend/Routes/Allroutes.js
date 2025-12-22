@@ -19,6 +19,7 @@ import {
   GetTimes,
   doctorOnly,
   GetforDoctorsAppointment,
+  GetPageAppointments,
   AppointmentsCompleted,
 } from "./Controllers.js";
 
@@ -49,6 +50,12 @@ AppRoutes.get(
   Protect,
   doctorOnly,
   GetforDoctorsAppointment
+);
+AppRoutes.get(
+  "/Doctor/GetPageAppointments",
+  Protect,
+  doctorOnly,
+  GetPageAppointments
 );
 
 AppRoutes.get("/checkAuth", Protect, (req, res) => {

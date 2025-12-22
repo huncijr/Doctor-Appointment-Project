@@ -22,7 +22,7 @@ const AppointmentTable = ({ doctor }) => {
     const date = new Date(today);
     date.setDate(date.getDate() - 7);
     let newdate = formatDate(date);
-    console.log(newdate);
+    // console.log(newdate);
     return newdate;
   });
 

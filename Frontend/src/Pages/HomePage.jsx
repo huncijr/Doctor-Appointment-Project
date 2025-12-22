@@ -100,7 +100,7 @@ const HomePage = () => {
       } else {
         setSelectedDoctor(res.data[0]);
       }
-      console.log(res.data);
+      // console.log(res.data);
       navigate(`/Appointment/${doctor.fullname}`, {
         state: { doctor: res.data },
       });

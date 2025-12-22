@@ -232,6 +232,15 @@ export const MakeAnAppointment = async (req, res) => {
       completed,
       disabled,
     } = req.body;
+    const alreadyAdded = await Appointment.findOne({
+      date: date,
+      time: time,
+    });
+    if (alreadyAdded) {
+      return res
+        .status(409)
+        .json({ Message: "Can't make another appointment on this date!" });
+    }
     let user = await User.findOne({ username });
     let activeuserappointments = await Appointment.countDocuments({
       userid: id,
@@ -245,7 +254,7 @@ export const MakeAnAppointment = async (req, res) => {
     if (!user) return res.status(404).json({ Message: "User was not found" });
     const selecteddoctor = await Doctor.findById(doctorid);
     if (!selecteddoctor)
-      return res.status(4040).json({ Message: "Doctor was not found!" });
+      return res.status(404).json({ Message: "Doctor was not found!" });
     const appointment = await Appointment.create({
       userid: id,
       doctorid,
@@ -436,6 +445,7 @@ export const doctorOnly = (req, res, next) => {
 export const GetforDoctorsAppointment = async (req, res) => {
   try {
     const doctorProfile = await Doctor.findOne({ fullname: req.user.fullname });
+    const limit = 15;
     if (!doctorProfile) {
       return res.status(404).json({ message: "Doctor Profile not found!" });
     }
@@ -445,21 +455,51 @@ export const GetforDoctorsAppointment = async (req, res) => {
       disabled: { $ne: true },
     })
       .sort({ date: 1, time: 1 })
-      .limit(15);
+      .limit(limit);
+
     const CompletedAppointments = await Appointment.find({
       doctorid: doctorProfile._id,
       completed: true,
     })
       .sort({ updatedAt: -1 })
-      .limit(5);
-    console.log(Appointments.length);
-    console.log(CompletedAppointments.length);
+      .limit(limit * 2);
+    const Total = await Appointment.countDocuments({
+      doctorid: doctorProfile._id,
+      completed: false,
+    });
     res.status(200).json({
       upcoming: Appointments,
       completed: CompletedAppointments,
+      total: Math.ceil(Total / limit),
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+export const GetPageAppointments = async (req, res) => {
+  try {
+    const { page, limit } = req.query;
+    console.log(req.user.fullname);
+    console.log("oldal:", page, "limit:", limit);
+    const skip = (page - 1) * limit;
+    console.log(skip);
+    const doctorprofile = await Doctor.findOne({ fullname: req.user.fullname });
+    if (!doctorprofile) {
+      return res.status(404).json({ message: "Doctor was not found!" });
+    }
+    const [appointments, total] = await Promise.all([
+      Appointment.find({ doctorid: doctorprofile._id, completed: false })
+        .sort({ date: 1, time: 1 })
+        .skip(skip)
+        .limit(limit),
+      Appointment.countDocuments({ completed: false }),
+    ]);
+    res.status(200).json({
+      appointments,
+    });
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };

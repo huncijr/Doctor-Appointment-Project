@@ -10,31 +10,52 @@ const DoctorAppointments = () => {
   const [upcomingappointments, setUpcomingAppointments] = useState([]);
   const [completedappointments, setCompletedAppointments] = useState([]);
   const [otherappointments, setOtherAppointments] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [pages, setPages] = useState([]);
+  const LIMIT = 15;
+  const [total, setTotal] = useState(null);
 
   const onPageChange = (page) => setCurrentPage(page);
   const { user } = useAuth();
   useEffect(() => {
     const FetchAppointments = async () => {
       try {
-        const response = await API.get("/Doctor/Appointments", {
-          withCredentials: true,
-        });
+        let response;
+        if (currentPage === 1) {
+          response = await API.get("/Doctor/Appointments", {
+            withCredentials: true,
+          });
 
-        const { upcoming, completed } = response.data;
-        const firstupcoming = upcoming.slice(0, 5);
-        const firstotherupcomig = upcoming.slice(firstupcoming.length);
-        setUpcomingAppointments(firstupcoming);
-        setOtherAppointments(firstotherupcomig);
-        setCompletedAppointments(completed);
+          const { upcoming, completed } = response.data;
+          const firstupcoming = upcoming.slice(0, 5);
+          const firstotherupcomig = upcoming.slice(firstupcoming.length);
+          setUpcomingAppointments(firstupcoming);
+          setOtherAppointments(firstotherupcomig);
+          setCompletedAppointments(completed);
+          setTotal(response.data.total);
+          return;
+        }
+        response = await API.get("/Doctor/GetPageAppointments", {
+          withCredentials: true,
+          params: {
+            page: currentPage,
+            limit: LIMIT,
+          },
+        });
+        setOtherAppointments(response.data.appointments);
+        setUpcomingAppointments([]);
+        setCompletedAppointments([]);
       } catch (error) {
         console.error(error);
       }
     };
     FetchAppointments();
-  }, []);
+  }, [currentPage]);
   useEffect(() => {
-    console.log(upcomingappointments);
-  }, [upcomingappointments]);
+    // console.log(upcomingappointments);
+    console.log(pages);
+    console.log(appointments);
+  }, [appointments]);
 
   const getGreeting = (name) => {
     const hour = new Date().getHours();
@@ -50,30 +71,20 @@ const DoctorAppointments = () => {
     return dayName;
   };
   const handleAppointments = (id) => {
-    let movedAppointment = null;
+    setTimeout(() => {
+      setUpcomingAppointments((prevUpcoming) => {
+        setOtherAppointments((prevOthers) => {
+          const newUpcoming = prevUpcoming.filter((app) => app._id !== id);
+          if (!prevOthers || prevOthers.length === 0) return prevOthers;
 
-    // 1. Először vegyük ki az other appointments első elemét
-    setOtherAppointments((prevOthers) => {
-      if (!prevOthers || prevOthers.length === 0) return prevOthers;
-
-      [movedAppointment] = prevOthers; // Eltároljuk
-      return prevOthers.slice(1); // Levesszük az elsőt
-    });
-
-    // 2. Aztán frissítsük az upcoming-ot
-    setUpcomingAppointments((prevUpcoming) => {
-      const filtered = prevUpcoming.filter((app) => app._id !== id);
-
-      // Csak akkor adjuk hozzá, ha van movedAppointment ÉS még nincs benne
-      if (
-        movedAppointment &&
-        !filtered.some((app) => app._id === movedAppointment._id)
-      ) {
-        return [...filtered, movedAppointment];
-      }
-
-      return filtered;
-    });
+          const [movedApp, ...restOthers] = prevOthers;
+          setUpcomingAppointments([...newUpcoming, movedApp]);
+          console.log(restOthers);
+          return restOthers;
+        });
+        return prevUpcoming.filter((app) => app._id !== id);
+      });
+    }, 500);
   };
 
   const handleDelete = async (appointmentid) => {
@@ -87,7 +98,6 @@ const DoctorAppointments = () => {
     }
   };
   const handleAddCompleted = async (appointmentid) => {
-    console.log(appointmentid);
     try {
       const response = await API.put("/AddCompleted", { appointmentid });
       setCompletedAppointments((prev) => {
@@ -160,9 +170,11 @@ const DoctorAppointments = () => {
               </div>
             </>
           )}
-          <span className="text-white tracking-widest changa-one text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-bold hover-doubleline">
-            Upcoming
-          </span>
+          {upcomingappointments.length > 0 && (
+            <span className="text-white tracking-widest changa-one text-4xl md:text-3xl lg:text-4xl xl:text-5xl font-bold hover-doubleline">
+              Upcoming
+            </span>
+          )}
           <div className=" grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 mt-10 animate-fadeInBottom ">
             {upcomingappointments && upcomingappointments.length > 0 ? (
               upcomingappointments.map((app) => (
@@ -174,13 +186,13 @@ const DoctorAppointments = () => {
                   handleDay={handleDay}
                 />
               ))
-            ) : (
+            ) : otherappointments.length === 0 ? (
               <div className="flex relative">
                 <span className="changa-one font-bold text-xl sm:text-2xl md:text-3xl lg:text-4xl text-secondary ">
                   No appointments found !
                 </span>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
         <div className="flex flex-col justify-center  sm:items-start sm:justify-start">
@@ -211,12 +223,24 @@ const DoctorAppointments = () => {
             )}
           </div>
         </div>
-        <div className="flex flex-col items-center overflow-x-auto ">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={10}
-            onPageChange={onPageChange}
-          />
+        <div className="py-10">
+          {total && (
+            <>
+              <div className="flex">
+                <span className="text-white">
+                  {upcomingappointments.length === 0 &&
+                    `${otherappointments.length} appointments was found on page ${currentPage}`}
+                </span>
+              </div>
+              <div className="flex flex-col items-center overflow-x-auto">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={total}
+                  onPageChange={onPageChange}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
