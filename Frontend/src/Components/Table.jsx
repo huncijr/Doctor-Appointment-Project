@@ -294,10 +294,7 @@ const AppointmentTable = ({ doctor }) => {
             })} -
             ${appearweekdays[appearweekdays.length - 1].toLocaleDateString(
               "en-US",
-              {
-                month: "short",
-                day: "numeric",
-              }
+              { month: "short", day: "numeric", year: "numeric" }
             )}`}
         </span>
       </div>
@@ -334,14 +331,16 @@ const AppointmentTable = ({ doctor }) => {
             <tr>
               <th className="border bg-white border-gray-400 px-2 py-1"></th>
               {days &&
-                days.map((day, i) => (
-                  <th
-                    key={i}
-                    className="border bg-white border-gray-400 px-2 py-1"
-                  >
-                    {day}
-                  </th>
-                ))}
+                days
+                  .filter((day) => day && day !== "Invalid Date")
+                  .map((day, i) => (
+                    <th
+                      key={i}
+                      className="border bg-white border-gray-400 px-2 py-1"
+                    >
+                      {day}
+                    </th>
+                  ))}
             </tr>
           </thead>
 

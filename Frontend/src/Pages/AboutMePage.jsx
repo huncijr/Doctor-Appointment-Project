@@ -11,7 +11,6 @@ const AboutMePage = () => {
     async function getUser(name) {
       try {
         const res = await axios.get(`https://api.github.com/users/${name}`);
-        console.log(res.data);
         setUser(res.data);
       } catch (error) {
         console.error(error);
@@ -19,9 +18,6 @@ const AboutMePage = () => {
     }
     getUser(username);
   }, []);
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
 
   return (
     <div className="relative flex flex-col items-center z-10">

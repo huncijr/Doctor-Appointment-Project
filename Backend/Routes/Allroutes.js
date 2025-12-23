@@ -32,7 +32,17 @@ AppRoutes.post("/Login", GetLogin);
 AppRoutes.post("/Doctor-verify", verifyDoctorCode);
 AppRoutes.delete("/Delete/:id", DeleteUser);
 AppRoutes.post("/SignOut", SignOutUser);
-AppRoutes.post("/Appointment", MakeAnAppointment);
+AppRoutes.post(
+  "/Appointment",
+  Protect,
+  (req, res, next) => {
+    if (req.body.reason !== "Reserved") {
+      return doctorOnly(req, res, next);
+    }
+    next();
+  },
+  MakeAnAppointment
+);
 AppRoutes.get("/GetAppointment", GetAppointment);
 AppRoutes.put("/UpdatedAppointment", UpdatedAppointment);
 AppRoutes.put(

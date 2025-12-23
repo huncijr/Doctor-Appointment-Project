@@ -16,7 +16,6 @@ export const Protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
     // console.log(decoded);
     req.user = await User.findById(decoded.userId).select("-password");
-    // console.log(req.user);
     next();
   } catch (error) {
     res.status(401).json({ message: "Not authorized" });
@@ -233,8 +232,9 @@ export const MakeAnAppointment = async (req, res) => {
       disabled,
     } = req.body;
     const alreadyAdded = await Appointment.findOne({
-      date: date,
-      time: time,
+      doctorid,
+      date,
+      time,
     });
     if (alreadyAdded) {
       return res
@@ -255,6 +255,7 @@ export const MakeAnAppointment = async (req, res) => {
     const selecteddoctor = await Doctor.findById(doctorid);
     if (!selecteddoctor)
       return res.status(404).json({ Message: "Doctor was not found!" });
+    console.log(date);
     const appointment = await Appointment.create({
       userid: id,
       doctorid,
@@ -276,7 +277,23 @@ export const MakeAnAppointment = async (req, res) => {
 };
 export const GetAppointment = async (req, res) => {
   try {
-    const { userid } = req.query;
+    let { userid, doctorid } = req.query;
+    const user = await User.findById(userid);
+    if (!user) {
+      return res.status(404).json({ message: "User was NOT found" });
+    }
+    let query = { userid };
+    if (doctorid) {
+      doctorid = JSON.parse(doctorid);
+      if (Array.isArray(doctorid)) {
+        query.doctorid = { $in: doctorid };
+      } else {
+        query.doctorid = doctorid;
+      }
+      query.completed = { $ne: true };
+    }
+
+    const appointments = await Appointment.find(query);
     // console.log(userid);
     // const cacheKey = `Appointmentids:${userid}`;
     // console.log(cacheKey);
@@ -285,14 +302,6 @@ export const GetAppointment = async (req, res) => {
     // if (cached) {
     //   return res.json(JSON.parse(cached));
     // }
-    const user = await User.findById(userid);
-
-    if (!user) {
-      return res.status(404).json({ message: "User was NOT found" });
-    }
-    const appointments = await Appointment.find({
-      userid,
-    });
 
     //console.log(appointments);
     if (!appointments || appointments.length === 0) {
@@ -397,7 +406,6 @@ export const GetDoctorAppointments = async (req, res) => {
 export const DeleteAppointment = async (req, res) => {
   try {
     const { appointmentid } = req.body;
-    console.log(appointmentid);
     const appointment = await Appointment.findById(appointmentid);
     if (!appointment) {
       return res.status(404).json({ message: "Appointment wasnt found" });

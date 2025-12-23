@@ -75,7 +75,7 @@ export const Doctors = {
     schedule: {
       Monday: [
         { time: "8 AM", reason: "" },
-        { time: "9 AM", reason: reasons[2] },
+        { time: "9 AM", reason: "" },
         { time: "10 AM", reason: "" },
         { time: "11 AM", reason: reasons[0] },
         { time: "12 PM", reason: "" },
@@ -151,7 +151,7 @@ export const Doctors = {
         { time: "12 PM", reason: "" },
         { time: "1 PM", reason: reasons[0] },
         { time: "2 PM", reason: "" },
-        { time: "3 PM", reason: reasons[1] },
+        { time: "3 PM", reason: "" },
         { time: "4 PM", reason: "" },
       ],
       Thursday: [
@@ -192,7 +192,7 @@ export const Doctors = {
       ],
       Tuesday: [
         { time: "12 PM", reason: "" },
-        { time: "1 PM", reason: reasons[2] },
+        { time: "1 PM", reason: "" },
         { time: "2 PM", reason: "" },
         { time: "3 PM", reason: "" },
         { time: "4 PM", reason: reasons[0] },
@@ -269,7 +269,7 @@ export const Doctors = {
         { time: "12 PM", reason: "" },
         { time: "1 PM", reason: reasons[0] },
         { time: "2 PM", reason: "" },
-        { time: "3 PM", reason: reasons[2] },
+        { time: "3 PM", reason: "" },
       ],
       Thursday: [
         { time: "9 AM", reason: "" },
@@ -314,7 +314,7 @@ export const Doctors = {
         { time: "6 PM", reason: "" },
         { time: "7 PM", reason: reasons[0] },
         { time: "8 PM", reason: "" },
-        { time: "9 PM", reason: reasons[3] },
+        { time: "9 PM", reason: "" },
         { time: "10 PM", reason: "" },
       ],
       Wednesday: [

@@ -148,11 +148,22 @@ const AllAppointmentPage = () => {
         message: message,
         rating,
       });
-      console.log(res.data.success);
       if (res.data.success) {
         toast.success("Your review was successfully sent!");
         setCompletedAppointments((prev) =>
           prev.filter((app) => app._id !== id)
+        );
+        setAlreadyAppointments((prev) =>
+          prev.map((app) =>
+            app._id === id
+              ? {
+                  ...app,
+                  rating,
+                  message,
+                  disabled: true,
+                }
+              : app
+          )
         );
       }
     } catch (error) {
@@ -214,7 +225,6 @@ const AllAppointmentPage = () => {
     setWaitDelete(false);
   };
   const DeleteAppointment = (id) => {
-    console.log(id);
     const controller = new AbortController();
     CancelDelete.current = controller;
     setWaitDelete(true);

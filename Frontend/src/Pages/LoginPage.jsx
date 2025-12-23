@@ -204,7 +204,7 @@ const LoginPage = () => {
       console.log(response.data);
       if (temptdoctorid && isdoctor) {
         try {
-          console.log("lefutottam");
+          // console.log("lefutottam");
           const verify = await API.post(
             "/Doctor-verify",
             {

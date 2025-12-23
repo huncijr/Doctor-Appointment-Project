@@ -46,6 +46,15 @@ const NewAppointment = () => {
   const [showratelimiterToast, setShowRateLimiterToast] = useState(false);
   const [isdisable, setisDisable] = useState(false);
   const [openterms, setOpenTerms] = useState(false);
+  const [allproblems, setAllProblems] = useState([
+    "Reserved",
+    "Lunch Break",
+    "Meeting",
+    "Conference",
+    "Personal",
+    "Important",
+  ]);
+  const [theproblem, setTheProblem] = useState(null);
   const navigate = useNavigate();
 
   let mergedTimes = null;
@@ -152,6 +161,12 @@ const NewAppointment = () => {
     }
   }, [findappointments]);
 
+  useEffect(() => {
+    if (user && user.role === "doctor") {
+      setTheProblem(allproblems[0]);
+    }
+  }, [user]);
+
   function parseDate(date) {
     if (!date) return;
     const days = {
@@ -205,7 +220,8 @@ const NewAppointment = () => {
     let day = Number(parts[3]);
     let month = MonthDate[parts[2]];
     let year = parts[5];
-    let newDate = format(new Date(year, month - 1, day), "yyyy-MM-dd");
+    let newDate = format(new Date(year, month, day), "yyyy-MM-dd");
+    console.log(newDate);
     return newDate;
   }
   function handleFormatDate(date) {
@@ -213,12 +229,12 @@ const NewAppointment = () => {
     let usersdate = formatDate(dateparser);
     let todaysDate = new Date();
     let year = todaysDate.getFullYear();
-    let month = todaysDate.getMonth();
+    let month = todaysDate.getMonth() + 1;
     let day = String(todaysDate.getDate()).padStart(2, "0");
     const newDate = `${year}-${month}-${day}`;
 
     const dates = [usersdate, newDate];
-    // console.log("dates", dates);
+    console.log("dates", dates);
 
     if (dates[0] < dates[1] || dates[0] === dates[1]) {
       toast.error("Date is unavailable");
@@ -226,10 +242,7 @@ const NewAppointment = () => {
     }
     return true;
   }
-  // const test = parseDate(
-  //   "Thu Dec 04 2025 00:00:00 GMT+0200 (Eastern European Standard Time)"
-  // );
-  //console.log(handleFormatDate(test));
+
   function handleTime(doctordates, appointmentdates) {
     if (!Array.isArray(appointmentdates)) {
       return doctordates.map((slot) => ({
@@ -284,7 +297,7 @@ const NewAppointment = () => {
     let sendDate = parseDate(selecteddate);
     let formatdate = formatDate(sendDate);
     let [year, month, day] = formatdate.split("-");
-    month = String(Number(month) + 1).padStart(2, "0");
+    month = String(Number(month)).padStart(2, "0");
     day = String(day).padStart(2, "0");
     let newDate = `${year}-${month}-${day}`;
     // console.log(newDate);
@@ -299,7 +312,7 @@ const NewAppointment = () => {
         date: newDate,
         time: time,
         message: message,
-        reason: "Reserved",
+        reason: theproblem || "Reserved",
         completed: false,
         disabled: false,
       });
@@ -402,7 +415,7 @@ const NewAppointment = () => {
                   {" "}
                   Choose your time:
                 </Label>
-                <div className="mt-3">
+                <div className="mt-3 ">
                   <Dropdown
                     label={time}
                     size="lg"
@@ -437,6 +450,26 @@ const NewAppointment = () => {
                       ))}
                   </Dropdown>
                 </div>
+                {user?.role === "doctor" && (
+                  <div className="py-10">
+                    <Label className="text-lg text-white font-bold">
+                      Choose your Personal problem
+                    </Label>
+                    <div className="mt-3">
+                      <Dropdown label={theproblem}>
+                        {allproblems.map((problem, index) => (
+                          <DropdownItem
+                            className="bungee-inline"
+                            onClick={() => setTheProblem(problem)}
+                            key={index}
+                          >
+                            <span className="text-white">{problem}</span>
+                          </DropdownItem>
+                        ))}
+                      </Dropdown>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="max-w-md py-10">
