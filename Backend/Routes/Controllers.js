@@ -1,4 +1,4 @@
-import express from "express";
+import express, { response } from "express";
 import { generateToken } from "../utils/GenerateToken.js";
 import bcrypt from "bcryptjs";
 import { Appointment, User, Doctor } from "../DataBase/Schemas.js";
@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import redis from "../DataBase/Redis.js";
 import rateLimit from "../DataBase/Upstash.js";
-
+import axios from "axios";
 export const Protect = async (req, res, next) => {
   const token = req.cookies.jwt;
   // console.log(token);
@@ -19,6 +19,39 @@ export const Protect = async (req, res, next) => {
     next();
   } catch (error) {
     res.status(401).json({ message: "Not authorized" });
+  }
+};
+export const VerifyTurnstile = async (req, res, next) => {
+  dotenv.config();
+  const { turnstileToken } = req.body;
+  if (!turnstileToken) {
+    return res.status(403).json({ message: "Missing captcha token" });
+  }
+  try {
+    const { data } = await axios.post(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        secret: process.env.TURNSTILE_SECRET_KEY,
+        response: turnstileToken,
+        remoteip: req.ip,
+      },
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        timeout: 5000,
+      }
+    );
+    if (!data.success) {
+      return res.status(403).json({
+        message: "Captcha verification failed",
+        details: data["error-codes"] || [],
+      });
+    }
+    next();
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -65,6 +98,7 @@ export const GetRegistration = async (req, res) => {
   try {
     const { fullname, age, username, password, gender, registered, role } =
       req.body;
+    console.log(fullname);
     const UserExists = await User.findOne({ username });
     if (UserExists) {
       return res.status(400).json({ message: "User already exists" });
@@ -135,6 +169,7 @@ export const GetLogin = async (req, res) => {
 };
 export const verifyDoctorCode = async (req, res) => {
   const { userid, doctorCode } = req.body;
+  console.log(userid, doctorCode);
   try {
     const user = await User.findById(userid);
     if (!user || user.role !== "doctor")
@@ -246,11 +281,11 @@ export const MakeAnAppointment = async (req, res) => {
       userid: id,
       disabled: { $ne: true },
     });
-    // if (activeuserappointments > 4 && activeuserappointments) {
-    //   return res
-    //     .status(409)
-    //     .json({ message: "You cannot create more than 5 appointments" });
-    // }
+    if (activeuserappointments > 4 && activeuserappointments) {
+      return res
+        .status(409)
+        .json({ message: "You cannot create more than 5 appointments" });
+    }
     if (!user) return res.status(404).json({ Message: "User was not found" });
     const selecteddoctor = await Doctor.findById(doctorid);
     if (!selecteddoctor)

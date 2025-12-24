@@ -1,6 +1,7 @@
 import express from "express";
 import {
   Protect,
+  VerifyTurnstile,
   GetDoctors,
   GetDoctorsById,
   GetADoctor,
@@ -27,8 +28,8 @@ const AppRoutes = express.Router();
 AppRoutes.get("/AllDoctor", GetDoctors);
 AppRoutes.get("/Doctor", GetDoctorsById);
 AppRoutes.get("/ADoctor", GetADoctor);
-AppRoutes.post("/Signup", GetRegistration);
-AppRoutes.post("/Login", GetLogin);
+AppRoutes.post("/Signup", VerifyTurnstile, GetRegistration);
+AppRoutes.post("/Login", VerifyTurnstile, GetLogin);
 AppRoutes.post("/Doctor-verify", verifyDoctorCode);
 AppRoutes.delete("/Delete/:id", DeleteUser);
 AppRoutes.post("/SignOut", SignOutUser);
