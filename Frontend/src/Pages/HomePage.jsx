@@ -194,7 +194,7 @@ const HomePage = () => {
               FAQ
             </h1>
           </div>
-          <Accordion>
+          <Accordion className="flex flex-col ">
             <AccordionPanel>
               <AccordionTitle>
                 Is this a real medical appointment system?
@@ -218,6 +218,7 @@ const HomePage = () => {
                     href="https://github.com/huncijr"
                     className="text-cyan-600 hover:underline dark:text-cyan-500"
                   >
+                    {" "}
                     GitHub profile
                   </a>
                   .There you will find detailed documentation, examples of
@@ -235,8 +236,7 @@ const HomePage = () => {
                 <p className="mb-2 text-gray-500 dark:text-gray-400">
                   Simply choose your preferred doctor from the list, select a
                   date and time slot that is available, and confirm your
-                  appointment. You will then receive a confirmation
-                  notification.
+                  appointment.
                 </p>
               </AccordionContent>
             </AccordionPanel>
@@ -247,21 +247,17 @@ const HomePage = () => {
               <AccordionContent>
                 <p className="mb-2 text-gray-500 dark:text-gray-400">
                   Yes, you can cancel or reschedule an appointment through the
-                  appointment management page. Changes can be made up to 24
-                  hours before the scheduled time.
+                  appointment management page.
                 </p>
               </AccordionContent>
             </AccordionPanel>
             <AccordionPanel>
-              <AccordionTitle>
-                Can I cancel or reschedule an appointment?
-              </AccordionTitle>
+              <AccordionTitle>How Can I see my appointments?</AccordionTitle>
               <AccordionContent>
                 <p className="mb-2 text-gray-500 dark:text-gray-400">
-                  Simply choose your preferred doctor from the list, select a
-                  date and time slot that is available, and confirm your
-                  appointment. You will then receive a confirmation
-                  notification.
+                  You can view your appointments either in the table of the
+                  specific doctor you booked with or in the general appointments
+                  section.
                 </p>
               </AccordionContent>
             </AccordionPanel>
@@ -271,9 +267,8 @@ const HomePage = () => {
               </AccordionTitle>
               <AccordionContent>
                 <p className="mb-2 text-gray-500 dark:text-gray-400">
-                  Yes, once your appointment is confirmed, you will receive
-                  reminders via email or SMS (depending on your chosen
-                  notification settings) prior to your visit.
+                  No, you will not receive a notification because the user is
+                  not linked to an email address or phone number.
                 </p>
               </AccordionContent>
             </AccordionPanel>

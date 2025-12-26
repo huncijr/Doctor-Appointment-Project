@@ -118,8 +118,8 @@ const AppointmentPage = () => {
             {user
               ? myappointments &&
                 (appointments && appointments.length > 0 ? (
-                  <div className="p-10 flex items-center flex-col gap-2">
-                    <div className="animate-fadeInScale p-6 border rounded-2xl min-w-full shadow-md bg-white">
+                  <div className="p-10 flex items-center flex-col gap-2 overflow-y-auto w-full max-w-full min-w-0">
+                    <div className="animate-fadeInScale p-6 border rounded-2xl shadow-md bg-white min-w-[80%] ">
                       <div className="mb-4 text-center border-b-2 pb-3 font-semibold">
                         <h2 className="lora text-xl sm:text-2xl md:text-3xl lg:text-4xl">
                           Your appointments!
@@ -331,9 +331,9 @@ const AppointmentPage = () => {
             {user
               ? myappointments &&
                 (appointments && appointments.length > 0 ? (
-                  <div className="p-10 flex items-center flex-col gap-2">
-                    <div className="animate-fadeInScale p-6 border rounded-2xl min-w-full shadow-md bg-white">
-                      <div className="mb-4 text-center border-b-2 pb-3 font-semibold">
+                  <div className="p-10 flex items-center flex-col gap-2 overflow-y-auto w-full max-w-full min-w-0 ">
+                    <div className="animate-fadeInScale p-6 border rounded-2xl shadow-md bg-white min-w-[80%] ">
+                      <div className="mb-4 text-center border-b-2 pb-3 font-semibold ">
                         <h2 className="lora text-xl sm:text-2xl md:text-3xl lg:text-4xl">
                           Your appointments!
                         </h2>

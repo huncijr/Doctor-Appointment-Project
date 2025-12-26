@@ -1,5 +1,5 @@
 import Navbar from "../Components/Navbar.jsx";
-import guest from "../other pics/guest.png";
+import guest from "../other pics/welcomeguess.png";
 import welcome from "../other pics/welcome.png";
 import Mangender from "../other pics/Man.webp";
 import Womangender from "../other pics/Woman.webp";
@@ -27,6 +27,8 @@ import { API } from "../Context/AppointmentAPI.js";
 import { useAuth } from "../Context/CheckAuth.jsx";
 import { useCookie } from "../Context/Cookies.jsx";
 import { Link } from "react-router-dom";
+import Turnstile from "../Context/Turnstile";
+
 const LoginPage = () => {
   const { user, setUser } = useAuth();
   const { cookies, declineCookies } = useCookie();
@@ -39,6 +41,7 @@ const LoginPage = () => {
   const [isdoctor, setIsDoctor] = useState(false);
   const [temptdoctorid, setTemptDoctorId] = useState(null);
   const [doctorCode, setDoctorCode] = useState("");
+  const [turnstiletoken, setTurnstileToken] = useState(null);
 
   const [loginusername, setLoginUserName] = useState("");
   const [loginpassword, setLoginPassword] = useState("");
@@ -163,6 +166,7 @@ const LoginPage = () => {
           gender: gender,
           registered: true,
           role: "user",
+          turnstileToken: turnstiletoken || "",
         },
         {
           withCredentials: true,
@@ -172,6 +176,8 @@ const LoginPage = () => {
         localStorage.setItem("user", JSON.stringify(response.data));
       }
       setUser(response.data);
+      setTurnstileToken(null);
+      window.turnstile.reset();
     } catch (error) {
       if (error.response && error.response.status === 400) {
         toast.error("User name is already taken!");
@@ -191,20 +197,23 @@ const LoginPage = () => {
       return false;
     }
     try {
-      let response = await API.post(
-        "/Login",
-        {
-          username: loginusername,
-          password: loginpassword,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-      console.log(response.data);
+      let response;
+      if (!isdoctor) {
+        response = await API.post(
+          "/Login",
+          {
+            username: loginusername,
+            password: loginpassword,
+            turnstileToken: turnstiletoken || "",
+          },
+          {
+            withCredentials: true,
+          }
+        );
+      }
       if (temptdoctorid && isdoctor) {
         try {
-          // console.log("lefutottam");
+          console.log("lefutottam");
           const verify = await API.post(
             "/Doctor-verify",
             {
@@ -229,12 +238,12 @@ const LoginPage = () => {
         }
         return;
       } else if (response && response.data.requiresDoctorCode) {
-        console.log("lefutottam");
+        // console.log("lefutottam");
         setIsDoctor(true);
         setTemptDoctorId(response.data.userId);
+
         return;
       } else {
-        console.log("lefutottam");
         if (!cookies) {
           localStorage.setItem("user", JSON.stringify(response.data));
         }
@@ -306,7 +315,7 @@ const LoginPage = () => {
           {user ? "WELCOME" : "MAKE AN ACCOUNT"}
         </h2>
       </div>
-      <div className="flex flex-col sm:flex-row items-center min-h-screen justify-evenly w-full gap-5 sm:gap-2">
+      <div className="flex flex-col sm:flex-row items-center mt-10 justify-evenly w-full gap-5 sm:gap-2">
         {!user && (
           <img
             src={guest}
@@ -450,10 +459,18 @@ const LoginPage = () => {
                         </div>
                       </div>
                     </div>
+                    <div className="flex flex-col justify-center items-center lg:items-end py-5">
+                      <Turnstile
+                        onVerify={(token) => {
+                          setTurnstileToken(token);
+                        }}
+                      />
+                    </div>
                     <div className="flex mt-3 justify-end">
                       <Button
                         type="submit"
                         className="bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 text-white hover:bg-gradient-to-br focus:ring-teal-300 dark:focus:ring-teal-800"
+                        disabled={!turnstiletoken}
                       >
                         Submit
                       </Button>
@@ -514,11 +531,19 @@ const LoginPage = () => {
                         </div>
                       </div>
                     )}
+                    <div className="flex flex-col items-center py-5">
+                      <Turnstile
+                        onVerify={(token) => {
+                          setTurnstileToken(token);
+                        }}
+                      />
+                    </div>
                     <div className="flex justify-end">
                       <Button
                         type="submit"
                         color="dark"
                         className="mt-5 w-fit "
+                        disabled={!turnstiletoken}
                       >
                         Submit
                       </Button>
