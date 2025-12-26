@@ -32,6 +32,7 @@ The frontend handles the user interface and user interactions(UI/UX).
 Additional libraries and component used in the frontend:
 
 [![Flowbite React](https://img.shields.io/badge/Flowbite-React-38BDF8?logo=flowbite&logoColor=white)](https://flowbite-react.com)
+[![Lucide React](https://img.shields.io/badge/Lucide-React-000000?logo=lucide&logoColor=white)](https://lucide.dev)
 [![react-hot-toast](https://img.shields.io/badge/react--hot--toast-Notifications-FF6F61?logo=react&logoColor=white)](https://react-hot-toast.com)
 [![Axios](https://img.shields.io/badge/Axios-HTTP_Client-5A29E4?logo=axios&logoColor=white)](https://axios-http.com)
 
@@ -73,7 +74,7 @@ The login page features a clean and modern design, allowing users to quickly and
 
 ## 🚀 Installation & Run
 
-Follow these steps to set up abd run the project locally.
+Follow these steps to set up and run the project locally.
 
 ### Prerequisites
 
