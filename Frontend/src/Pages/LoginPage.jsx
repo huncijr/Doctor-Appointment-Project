@@ -241,13 +241,13 @@ const LoginPage = () => {
         // console.log("lefutottam");
         setIsDoctor(true);
         setTemptDoctorId(response.data.userId);
-
         return;
       } else {
         if (!cookies) {
           localStorage.setItem("user", JSON.stringify(response.data));
         }
         setUser(response.data);
+        setTurnstileToken(null)
         toast.success(`Welcome back ${response.data.fullname}`);
       }
     } catch (error) {

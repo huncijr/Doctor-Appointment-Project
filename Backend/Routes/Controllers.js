@@ -96,6 +96,7 @@ export const GetADoctor = async (req, res) => {
 
 export const GetRegistration = async (req, res) => {
   try {
+    dotenv.config();
     const { fullname, age, username, password, gender, registered, role } =
       req.body;
     console.log(fullname);
@@ -117,7 +118,11 @@ export const GetRegistration = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? process.env.COOKIE_DOMAIN
+          : undefined,
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     res.status(201).json({
@@ -134,6 +139,7 @@ export const GetRegistration = async (req, res) => {
 
 export const GetLogin = async (req, res) => {
   try {
+    dotenv.config();
     const { username, password } = req.body;
     const user = await User.findOne({ username });
     if (!user) {
@@ -152,7 +158,11 @@ export const GetLogin = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? process.env.COOKIE_DOMAIN
+          : undefined,
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     res.status(200).json({
@@ -168,6 +178,7 @@ export const GetLogin = async (req, res) => {
   }
 };
 export const verifyDoctorCode = async (req, res) => {
+  dotenv.config();
   const { userid, doctorCode } = req.body;
   console.log(userid, doctorCode);
   try {
@@ -183,7 +194,11 @@ export const verifyDoctorCode = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+      domain:
+        process.env.NODE_ENV === "production"
+          ? process.env.COOKIE_DOMAIN
+          : undefined,
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     res.status(200).json({

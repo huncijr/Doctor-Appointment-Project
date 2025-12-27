@@ -23,7 +23,7 @@ The backend is responsible for authentification, data handling, and API endpoint
 
 The frontend handles the user interface and user interactions(UI/UX).
 
-### 🛠️ is built with
+### 🛠️ Built with
 
 [![Vite](https://img.shields.io/badge/Vite-Build_Tool-646CFF?logo=vite&logoColor=white)](https://vitejs.dev)
 [![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react&logoColor=white)](https://react.dev)
@@ -78,7 +78,7 @@ Follow these steps to set up and run the project locally.
 
 ### Prerequisites
 
-You will need accounts and credentials for the following services:\
+You will need accounts and credentials for the following services:
 
 1. **MongoDB**
 
@@ -92,7 +92,7 @@ You will need accounts and credentials for the following services:\
 2. **Redis**
 
    - Create a Redis account (e.g., via [Redis](https://redis.io/))
-   - Get the Redis URL and password.
+   - Get the Redis URL,PORT and password.
    - Set them as environment variables:
      ```bash
      REDIS_HOST=your_redis_url
@@ -102,7 +102,7 @@ You will need accounts and credentials for the following services:\
 
 3. **Upstash**
 
-   - Create a Redis account (e.g., via [Upstash](https://upstash.com/))
+   - Create an Upstash account (e.g., via [Upstash](https://upstash.com/))
    - Get the Upstash URL and token.
    - Set them as environment variables:
      ```bash
@@ -136,6 +136,7 @@ cd your-repository
 
 cd Backend
 npm install
+node DataBase/Doctors.js # run this command to activate doctors in the DataBase
 npm run dev
 
 The backend should now run on http://localhost:5001
