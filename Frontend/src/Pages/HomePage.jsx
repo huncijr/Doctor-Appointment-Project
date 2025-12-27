@@ -30,6 +30,8 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log(import.meta.VITE_API_URL);
+    console.log("hello");
     const getDoctors = async () => {
       try {
         const res = await API.get("/AllDoctor");
