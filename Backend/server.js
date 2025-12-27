@@ -22,12 +22,13 @@ app.use(cookieParser());
 app.use("/Doctorspic", express.static(path.join(process.cwd(), "Doctorspic")));
 app.use("/API", AppRoutes);
 
-if (process.env.MODE_ENV === "production") {
-  app.use(express.static(path.join(cwd(), "client", "dist")));
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(process.cwd(), "client", "dist", "index.html"));
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "OK",
+    message: "Backend is running",
+    timestamp: new Date().toISOString(),
   });
-}
+});
 
 app.listen(PORT, () => {
   console.log(`The server is running on Port ${PORT}`);
