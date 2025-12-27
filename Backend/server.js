@@ -7,7 +7,7 @@ import path from "path";
 import { connectDB } from "./DataBase/MongoDB.js";
 dotenv.config();
 
-let PORT = process.env.PORT || 5001;
+let PORT = process.env.PORT;
 const app = express();
 connectDB();
 
@@ -30,6 +30,6 @@ app.get("/health", (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`The server is running on Port ${PORT}`);
 });
