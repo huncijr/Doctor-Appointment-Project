@@ -121,6 +121,7 @@ export const GetRegistration = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       domain: undefined,
       maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
     res.status(201).json({
       _id: user._id,
@@ -158,6 +159,7 @@ export const GetLogin = async (req, res) => {
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       domain: undefined,
       maxAge: 30 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
     res.status(200).json({
       _id: user._id,
@@ -217,9 +219,10 @@ export const DeleteUser = async (req, res) => {
     await Appointment.deleteMany({ userid: user._id });
     res.clearCookie("jwt", {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       domain: undefined,
+      path: "/",
     });
     res.status(200).json({ message: "Account has been deleted succesfully" });
   } catch (error) {
@@ -232,8 +235,9 @@ export const SignOutUser = async (req, res) => {
   try {
     res.clearCookie("jwt", {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      path: "/",
       domain: undefined,
     });
     return res.status(200).json({ message: "Logged out succesfully" });
