@@ -597,7 +597,7 @@ const AllAppointmentPage = () => {
                         <div className="flex flex-col flex-1 sm:flex-row-reverse gap-2  justify-end bg-gray-600 ">
                           <div className="flex flex-[.4] items-center sm:items-end flex-col p-3  ">
                             <img
-                              src={`http://localhost:5001${selecteddoctor.img}`}
+                              src={`https://appointment-backend-bfe4bydmhfdygbew.canadacentral-01.azurewebsites.net${selecteddoctor.img}`}
                               className="object-contain w-[40%] sm:w-[70%] rounded-lg"
                             />
                             <p className="text-lg font-bold text-white text-center sm:text-end">

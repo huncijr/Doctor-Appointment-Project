@@ -4,7 +4,8 @@ export default function Turnstile({ onVerify }) {
   useEffect(() => {
     let widgetId;
 
-    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+    const siteKey =
+      import.meta.env.VITE_TURNSTILE_SITE_KEY || "0x4AAAAAACI3GO-2YPvOMnNh";
 
     if (!siteKey) {
       console.error("Turnstile Error: VITE_TURNSTILE_SITE_KEY is missing!");
