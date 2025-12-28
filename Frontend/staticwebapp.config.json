@@ -3,6 +3,10 @@
     {
       "route": "/API/*",
       "proxy": "https://appointment-backend-bfe4bydmhfdygbew.canadacentral-01.azurewebsites.net/API"
+    },
+    {
+      "route": "/Doctorspic/*",
+      "proxy": "https://appointment-backend-bfe4bydmhfdygbew.canadacentral-01.azurewebsites.net/Doctorspic"
     }
   ],
   "navigationFallback": {
