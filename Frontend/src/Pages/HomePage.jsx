@@ -27,6 +27,8 @@ const HomePage = () => {
   const { selecteddoctor, setSelectedDoctor } = useDoctor();
   const [doctors, setDoctors] = useState(null);
   const navigate = useNavigate();
+  IMAGE_BASE_URL =
+    import.meta.env.VITE_IMAGE_BASE_URL || "http://localhost:5001";
 
   useEffect(() => {
     console.log(import.meta.env.VITE_API_URL);
@@ -169,7 +171,7 @@ const HomePage = () => {
                   <div className="flex-1 flex flex-col p-1 ">
                     <figure className="h-80 overflow-hidden rounded-md w-full object-cover border-b-2 py-2 mb-2 border-secondary">
                       <img
-                        src={`https://appointment-backend-bfe4bydmhfdygbew.canadacentral-01.azurewebsites.net${doctor.img}`}
+                        src={`${IMAGE_BASE_URL}${doctor.img}`}
                         alt="No image "
                         className="text-white w-full h-full object-cover  min-w-[100%] min-h-[100%]"
                       />
