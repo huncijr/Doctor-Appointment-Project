@@ -22,6 +22,6 @@ app.use(cookieParser());
 app.use("/Doctorspic", express.static(path.join(process.cwd(), "Doctorspic")));
 app.use("/API", AppRoutes);
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`The server is running on Port ${PORT}`);
 });
