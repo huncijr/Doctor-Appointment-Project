@@ -6,6 +6,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
     ".flowbite-react/class-list.json",
+    "node_modules/flowbite-react/dist/**/*.{js,jsx,ts,tsx,mjs,cjs}",
   ],
   theme: {
     extend: {
