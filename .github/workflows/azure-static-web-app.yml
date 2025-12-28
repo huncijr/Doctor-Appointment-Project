@@ -32,6 +32,10 @@ jobs:
           api_location: "" # Api source code path - optional
           output_location: "dist" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
+        env:
+          VITE_API_URL: ${{ secrets.MY_VITE_API_URL }}
+          VITE_TURNSTILE_SITE_KEY: ${{ secrets.MY_VITE_SITE_KEY }}
+          VITE_IMAGE_BASE_URL: ${{ secrets.MY_VITE_IMAGE_URL }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
