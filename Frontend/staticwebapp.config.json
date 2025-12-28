@@ -1,4 +1,10 @@
 {
+  "routes": [
+    {
+      "route": "/API/*",
+      "proxy": "https://appointment-backend-bfe4bydmhfdygbew.canadacentral-01.azurewebsites.net/API"
+    }
+  ],
   "navigationFallback": {
     "rewrite": "/index.html",
     "exclude": ["/images/*", "/css/*", "/js/*"]
