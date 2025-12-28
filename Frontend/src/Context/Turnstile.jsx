@@ -11,7 +11,7 @@ export default function Turnstile({ onVerify }) {
           },
         });
       } else {
-        setTimeout(waitForTurnstile, 100);
+        setTimeout(waitForTurnstile, 1000);
       }
     };
     waitForTurnstile();
