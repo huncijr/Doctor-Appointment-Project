@@ -118,11 +118,8 @@ export const GetRegistration = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-      domain:
-        process.env.NODE_ENV === "production"
-          ? process.env.COOKIE_DOMAIN
-          : undefined,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: undefined,
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     res.status(201).json({
@@ -158,11 +155,8 @@ export const GetLogin = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-      domain:
-        process.env.NODE_ENV === "production"
-          ? process.env.COOKIE_DOMAIN
-          : undefined,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: undefined,
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     res.status(200).json({
@@ -194,11 +188,8 @@ export const verifyDoctorCode = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
-      domain:
-        process.env.NODE_ENV === "production"
-          ? process.env.COOKIE_DOMAIN
-          : undefined,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: undefined,
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     res.status(200).json({
