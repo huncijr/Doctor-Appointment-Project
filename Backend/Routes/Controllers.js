@@ -217,8 +217,9 @@ export const DeleteUser = async (req, res) => {
     await Appointment.deleteMany({ userid: user._id });
     res.clearCookie("jwt", {
       httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: undefined,
     });
     res.status(200).json({ message: "Account has been deleted succesfully" });
   } catch (error) {
@@ -231,8 +232,9 @@ export const SignOutUser = async (req, res) => {
   try {
     res.clearCookie("jwt", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      domain: undefined,
     });
     return res.status(200).json({ message: "Logged out succesfully" });
   } catch (error) {
