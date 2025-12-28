@@ -281,7 +281,7 @@ const AppointmentPage = () => {
                 >
                   <div className="relative overflow-hidden rounded-md h-0 pb-[100%]">
                     <img
-                      src={`http://localhost:5001${doctor.img}`}
+                      src={`https://appointment-backend-bfe4bydmhfdygbew.canadacentral-01.azurewebsites.net${doctor.img}`}
                       alt={doctor.fullname}
                       className="absolute top-0 left-0 w-full h-full object-cover text-white"
                     />
