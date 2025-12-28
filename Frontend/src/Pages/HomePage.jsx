@@ -27,7 +27,7 @@ const HomePage = () => {
   const { selecteddoctor, setSelectedDoctor } = useDoctor();
   const [doctors, setDoctors] = useState(null);
   const navigate = useNavigate();
-  IMAGE_BASE_URL =
+  const IMAGE_BASE_URL =
     import.meta.env.VITE_IMAGE_BASE_URL || "http://localhost:5001";
 
   useEffect(() => {
